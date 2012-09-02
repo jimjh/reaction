@@ -17,10 +17,11 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Reaction::VERSION
 
-  gem.add_development_dependency 'rspec'
+  gem.add_development_dependency 'rspec', '>= 2.11.1'
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rack-test'
   gem.add_development_dependency 'debugger-pry'
+  gem.add_development_dependency 'rails', '>= 3.2.8'
   gem.add_dependency 'faye', '>= 0.8.3'
 
 end
