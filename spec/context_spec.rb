@@ -17,11 +17,12 @@ describe 'Context' do
 
     class X
 
-      def publish(&block)
-        Reaction::Context.new
-          .on_invalidate { publish(&block) }
-          .run(&block)
+      extend Reaction::Modifiers
+
+      def publish(x)
+        puts 'hello!'
       end
+      reactive :publish
 
       def get(key)
         # invalidating and reactive function

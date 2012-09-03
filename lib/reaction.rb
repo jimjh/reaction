@@ -3,6 +3,7 @@ require 'faye'
 require 'reaction/version'
 require 'reaction/adapters/rack_adapter'
 require 'reaction/deps/context'
+require 'reaction/deps/modifiers'
 
 module Reaction
 
