@@ -1,7 +1,8 @@
 require 'faye'
 
-require 'reaction/adapters/rack_adapter'
 require 'reaction/version'
+require 'reaction/adapters/rack_adapter'
+require 'reaction/deps/context'
 
 module Reaction
 
