@@ -25,7 +25,7 @@ module ActionDispatch::Routing
       server = opts.delete :server
 
       Faye::WebSocket.load_adapter server
-      Reaction.bayeux = Reaction::RackAdapter.new(opts)
+      Reaction.bayeux = Reaction::Adapters::RackAdapter.new(opts)
       mount Reaction.bayeux, at: path
 
     end
