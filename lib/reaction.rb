@@ -1,5 +1,4 @@
 require 'faye'
-
 require 'reaction/version'
 
 module Reaction

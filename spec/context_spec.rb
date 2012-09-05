@@ -20,7 +20,6 @@ describe 'Context' do
       extend Reaction::Modifiers
 
       def publish(x)
-        puts 'hello!'
       end
       reactive :publish
 
