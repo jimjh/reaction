@@ -11,6 +11,9 @@ module Reaction
     # Loads package files.
     # Usage:
     #   require_package :deps
+    # loads deps/require.rb, which loads everything else.
+    # @param [Symbol] package         name of package to load
+    # @return [Boolean] true if loaded, false otherwise
     def require_package(package)
       reqs = File.join('reaction', package.to_s, 'require.rb')
       require_relative reqs
