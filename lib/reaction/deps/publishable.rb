@@ -8,11 +8,10 @@ module Reaction
   #   end
   module Publishable
 
+    # TODO
     def publish(collection, &block)
-
       # setup global context
       # TODO
-
     end
 
   end
