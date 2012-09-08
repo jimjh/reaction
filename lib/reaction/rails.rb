@@ -3,7 +3,7 @@ module Reaction
   # Reaction-Rails
   module Rails
 
-    # Setup path to custom Rails root
+    # Paths for Rails module.
     Paths = Struct.new(:root)
     @paths = Paths.new
     @paths.root = File.join(Reaction.root, 'reaction', 'rails')
