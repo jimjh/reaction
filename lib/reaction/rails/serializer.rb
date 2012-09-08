@@ -5,14 +5,29 @@ require 'action_controller/metal/renderers'
 class ActionController::Responder
   # Converts resource to the reaction format.
   def to_reaction
-    controller.render :json => resource.to_json
+    controller.render :reaction => resource
   end
 end
 
 module Reaction
   module Rails
+
     ActionController::Renderers.add :reaction do |obj, options|
-      render({json: obj.to_json}.merge options)
+      self.response.content_type = Mime::REACTION
+      # serialize into our format
+      self.response_body = Serializer.format_data(self, obj)
     end
+
+    # Serializer for Rails-Reaction
+    module Serializer
+      class << self
+        def format_data(controller, obj)
+          {type: 'data',
+           collection: controller.controller_name.classify,
+           items: obj}.to_json
+        end
+      end
+    end
+
   end
 end

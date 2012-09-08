@@ -36,7 +36,7 @@ module Reaction
       # Renders given resource in the reaction format.
       # @return [String] response body
       def react_with(resource)
-        render :json => resource
+        render :reaction => resource
       end
 
       # @return [Boolean] true if request format is reaction.

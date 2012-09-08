@@ -19,6 +19,11 @@ module Reaction
       require_relative reqs
     end
 
+    # @return [String] path to root of reaction library (points to +lib+).
+    def root
+      return File.dirname(__FILE__)
+    end
+
   end
 
   require_package :adapters
