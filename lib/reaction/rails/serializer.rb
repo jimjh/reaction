@@ -1,9 +1,9 @@
 require 'action_controller/metal/responder'
 require 'action_controller/metal/renderers'
 
-# Monkey-patched Responder class
+# Monkey-patched Responder class.
 class ActionController::Responder
-  # Converts resource to the reaction format.
+  # @return [String] JSON representation of resource in reaction format.
   def to_reaction
     controller.render :reaction => resource
   end
