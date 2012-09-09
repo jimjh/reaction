@@ -28,9 +28,15 @@ module Reaction
       require_relative reqs
     end
 
+    # @return [Boolean] true if loaded by Rails, false otherwise
+    def in_rails?
+      const_defined? :Rails and Rails.const_defined? :ActionDispatch
+    end
+
   end
 
   require_package :adapters
   require_package :deps
+  require_package :rails if in_rails?
 
 end
