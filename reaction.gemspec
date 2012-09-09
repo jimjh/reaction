@@ -21,6 +21,8 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rack-test'
   gem.add_development_dependency 'debugger-pry'
+  gem.add_development_dependency 'yard'
+  gem.add_development_dependency 'redcarpet'
 
   gem.add_development_dependency 'rails', '>= 3.2.8'
   gem.add_development_dependency 'rspec-rails'

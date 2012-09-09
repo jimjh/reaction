@@ -14,3 +14,20 @@ task :default => :spec
 # TODO: write a raketask to build the gem
 
 # TODO: write a raketask to release the gem
+
+namespace :doc do
+
+  desc 'Generate documentation for javascripts'
+  task :js do
+    %x{docco app/assets/javascripts/reaction/*.js --output js-doc}
+  end
+
+  desc 'Generate documentation for ruby scripts'
+  task :rb do
+    %x{yard doc --output-dir rb-doc}
+  end
+
+  desc 'Generate documentation for ruby and javascript'
+  task :all => [:js, :rb]
+
+end
