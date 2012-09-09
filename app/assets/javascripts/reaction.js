@@ -1,1 +1,0 @@
-var Static = 0;
