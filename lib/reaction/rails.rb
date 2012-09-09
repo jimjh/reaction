@@ -3,12 +3,15 @@ module Reaction
   # Reaction-Rails
   module Rails
 
-    # Paths for Rails module.
+    # Struct containing some convenience paths for Rails module.
+    # @attr_reader [String] path to +lib/reaction/rails+
     Paths = Struct.new(:root)
     @paths = Paths.new
     @paths.root = File.join(Reaction.root, 'reaction', 'rails')
 
     class << self
+      # @!attribute [r] paths
+      # @return [Paths] struct containing some convenience paths.
       attr_reader :paths
     end
 

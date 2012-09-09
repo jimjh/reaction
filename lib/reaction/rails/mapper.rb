@@ -10,17 +10,18 @@ module ActionDispatch::Routing
   class Mapper
 
     # Mounts reaction server.
-    # Usage:
+    # @example Mapping +'/reaction'+ to the reaction server.
     #   mount_reaction :at => '/reaction', :server => 'thin'
-    # = Options
-    # * +:at+     - where to mount reaction server, defaults to +'/reaction'+
-    # * +:server+ - what server to use, defaults to +'thin'+
-    # plus all other Faye options (e.g. +timeout+), except +:mount+.
+    # @option opts [String] :at     where to mount reaction server; defaults to +'/reaction'
+    # @option opts [String] :server which server to use; defaults to +'thin'+
+    # Other Faye options (e.g. +timeout+) except +:mount+ may also be passed.
+    # @raise [RuntimeError] if the server has already been mounted.
+    # @return [void]
     def mount_reaction(opts = {})
 
       raise RuntimeError, 'Reaction already mounted.' if Reaction.bayeux
 
-      opts = prepare_reaction opts
+      opts = defaultize opts
       path = opts.delete :at
       server = opts.delete :server
 
@@ -35,7 +36,7 @@ module ActionDispatch::Routing
     # Populates opts for reaction server with defaults.
     # @param [Hash] opts          hash of options
     # @return [Hash] defaultized options
-    def prepare_reaction(opts)
+    def defaultize(opts)
       defaults = {at: '/reaction', server: 'thin'}
       opts = defaults.merge opts
       opts[:mount] = '/bayeux' # force!
