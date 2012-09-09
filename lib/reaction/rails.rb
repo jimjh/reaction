@@ -19,7 +19,6 @@ module Reaction
 
 end
 
-require_relative './rails/mapper'
-require_relative './rails/serializer'
-require_relative './rails/mime_types'
-require_relative './rails/publisher'
+glob = File.join('rails', '*.rb')
+glob = File.expand_path(glob, File.dirname(__FILE__))
+Dir[glob].each { |file| require file }
