@@ -7,7 +7,7 @@ module Reaction
     # @attr_reader [String] path to +lib/reaction/rails+
     Paths = Struct.new(:root)
     @paths = Paths.new
-    @paths.root = File.join(Reaction.root, 'reaction', 'rails')
+    @paths.root = File.join(Reaction.paths.root, 'reaction', 'rails')
 
     class << self
       # @!attribute [r] paths

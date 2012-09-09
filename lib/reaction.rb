@@ -3,10 +3,19 @@ require 'reaction/version'
 
 module Reaction
 
+  # Struct containing some convenience paths for Reaction gem.
+  Paths = Struct.new(:root)
+  @paths = Paths.new
+  @paths.root = File.dirname(__FILE__)
+
   class << self
 
     # only one bayeux server per process for now
     attr_accessor :bayeux
+
+    # @!attribute [r] paths
+    #   @return [Paths] struct containing some convenience paths.
+    attr_reader :paths
 
     # Loads package files.
     # Usage:
@@ -17,11 +26,6 @@ module Reaction
     def require_package(package)
       reqs = File.join('reaction', package.to_s, 'require.rb')
       require_relative reqs
-    end
-
-    # @return [String] path to root of reaction library (points to +lib+).
-    def root
-      return File.dirname(__FILE__)
     end
 
   end
