@@ -9,50 +9,68 @@
 /*jshint strict:true unused:true*/
 /*global _:true*/
 
-// ## reaction-collection Module
-define(['require', './config', './util'], function(require){
+// # reaction-collection Module
+//} TODO: need to somehow remember which collections are synced and which
+//  aren't
+define(['./cache', './config', './util'], function(cache){
 
   'use strict';
 
-  // Inserts a document into the collection.
-  var insert = function(document) {
-    this.items.concat(document);
-    // TODO
+  var insert = function(doc) {
+    cache.insert(this.name, doc);
   };
 
-  // Removes a document from the collection.
-  var remove = function(query) {
-    // TODO
-    this.items.remove(query);
+  var remove = function() {
+    _.log('remove!');
   };
 
-  // Creates a persistent collection.
+  var _add_methods = function(obj) {
+    obj.insert = insert;
+    obj.remove = remove;
+    return obj;
+  };
+
+  // The 'meta' collection keeps an array of existing collections in the local
+  // storage. It's initialized on startup.
+  var meta_collection = null;
+  if (!cache.has('meta')) cache.set('meta', []);
+  meta_collection = _add_methods({ name: 'meta' });
+
+  // ## Creating a persistent collection
   //
-  //      // create a new collection with data from cache
-  //      reaction.collection('ints');
-  //      // create a new collection containing [1,2,3]
-  //      reaction.collection('ints', [1,2,3]);
-  //      // create a new collection containing an empty array.
-  //      reaction.collection('ints', []);
-  //
-  // ### options
-  // * `persist`:   set this to `false` to skip local storage (defaults to `true`).
+  // ### Examples
+  //     // create a new collection with data from cache/server
+  //     reaction.collection('posts');
+  //     // create a new collection containing [{..},{..},{..}]
+  //     reaction.collection('posts', [{..}, {..}, {..}]);
+  //     // create a new collection containing an empty array.
+  //     reaction.collection('ints', []);
   var constructor = function(name, items, options) {
 
-    var that = {
-      name: name,
-      insert: insert,
-      remove: remove
-    };
+    var that = _add_methods({ name: name });
+
+    // ### Options
+    // * `onData`: A callback function that is executed when data is received.
+    //             This will be invoked immediately if `items` is specified.
+    //             Optional.
+    options = _.defaults(options || {}, {
+      onData: function(){}
+    });
 
     if (_.isUndefined(items)) {
-      var cached = require('./cache')._get(name);
-      if (!_.isUndefined(cached)) that.items = cached.items;
+      // If the second argument (`items`) is not specified, the collection is
+      // automatically subscribed to a published model of the same name.
+      //} TODO: need some way to callback when data is received.
+      cache.subscribe(name, options.onData);
     } else {
-      that.items = items;
-      options = _.defaults(options || {}, {persist: true});
-      if (options.persist) require('./cache')._add(that);
+      // Otherwise, `items` is persisted in local storage. An error is thrown
+      // if `items` is not an array.
+      if (!_.isArray(items)) throw {error: 'items must be an array.'};
+      cache.set(name, items);
+      _.defer(options.onData);
     }
+
+    meta_collection.insert({name: name});
 
     return that;
 
