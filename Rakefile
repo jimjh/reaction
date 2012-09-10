@@ -19,12 +19,12 @@ namespace :doc do
 
   desc 'Generate documentation for javascripts'
   task :js do
-    %x{docco app/assets/javascripts/reaction/*.js --output js-doc}
+    sh 'groc'
   end
 
   desc 'Generate documentation for ruby scripts'
   task :rb do
-    %x{yard doc --output-dir rb-doc}
+    sh 'yard doc --output-dir rb-doc'
   end
 
   desc 'Generate documentation for ruby and javascript'
