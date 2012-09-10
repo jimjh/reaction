@@ -86,10 +86,16 @@ define(['./config', './util', 'faye/client', 'amplify'],
 
   };
 
+  var get = function(collection) {
+    if (_.isEmpty(collection)) throw {error: 'collection name must not be empty.'};
+    return amplify.store(_key(collection));
+  };
+
   return {
     subscribe: subscribe,
     has: has,
     insert: insert,
+    get: get,
     set: set,
     unset: unset
   };

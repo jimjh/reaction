@@ -24,9 +24,15 @@ define(['./cache', './config', './util'], function(cache){
     _.log('remove!');
   };
 
+  var find = function() {
+    // TODO
+    return cache.get(this.name);
+  };
+
   var _add_methods = function(obj) {
     obj.insert = insert;
     obj.remove = remove;
+    obj.find = find;
     return obj;
   };
 
