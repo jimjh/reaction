@@ -24,6 +24,13 @@ define(['underscore'], function(){
     if(!no_logger) _.each(arguments, function(m){ console.log(m); });
   };
 
+  // Sprintf + Log.
+  //
+  //      _.logf("{0} and {1}", "hello", "bye") //>> hello and bye
+  var logf = function() {
+    _.log(_.format.apply(this, arguments));
+  };
+
   // Super simple sprintf, adapted from an [answer][1] on SO.
   //
   //      _.format("{0} and {1}", 'hello', 'good bye');
@@ -52,6 +59,12 @@ define(['underscore'], function(){
     return _.bind(func, this, args);
   };
 
-  _.mixin({log: log, format: format, assert: assert, curry: curry});
+  _.mixin({
+    log: log,
+    logf: logf,
+    format: format,
+    assert: assert,
+    curry: curry
+  });
 
 });

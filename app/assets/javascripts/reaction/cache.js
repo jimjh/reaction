@@ -1,5 +1,5 @@
 /* ========================================================================
- * cache.js v0.0.1.1
+ * cache.js v0.0.1
  * http://github.com/jimjh/reaction
  * ========================================================================
  * Copyright (c) 2012 Carnegie Mellon University
@@ -7,12 +7,10 @@
  * ========================================================================
  */
 /*jshint strict:true unused:true*/
-/*global $:true _:true amplify:true*/
+/*global _:true $:true amplify:true*/
 
-// # reaction-cache Module
-// Uses amplify.js to simulate a write-through cache.
-define(['./config', './util', 'faye/client', 'amplify'],
-       function(config){
+// ## reaction-cache Module
+define(['reaction/config', 'reaction/util', 'amplify'], function(config) {
 
   'use strict';
 
@@ -24,81 +22,63 @@ define(['./config', './util', 'faye/client', 'amplify'],
     data: 'data'
   };
 
-  // Generates cache key from collection name.
-  var _key = function(collection) {
-    return CACHE_KEY_PREFIX + collection;
+  // Generates cache key from name.
+  var key = function(name) {
+    return CACHE_KEY_PREFIX + name;
   };
 
-  // Checks if the collection exists in the cache.
-  var has = function(collection) {
-    if (_.isEmpty(collection)) return false;
-    return !_.isUndefined(amplify.store(_key(collection)));
+  // Creates a new cache that is sync'ed with a Rails model of the same name.
+  // Options:
+  // * `onData`: invoked when the data is ready.
+  var Cache = function(name, options) {
+
+    // Throws error if `name` is undefined or empty.
+    if (_.isEmpty(name)) throw {error: 'model must not be undefined or empty.'};
+
+    // Ensure that the options dictionary is valid.
+    options = _.defaults(options || {}, {
+      onData: function(){}
+    });
+
+    this.uri = _('{0}{1}.reaction').format(config.paths.root, name);
+    this.key = key(name);
+    this.onData = options.onData;
+
+    _.defer(_.bind(this._fetch, this));
+
   };
 
-  // Handles the first record set for a collection received from the server.
-  //} TODO: check etags, cache control etc
-  var _data_handler = function(collection, data){
-    // Throws error if data has the wrong schema.
+  // Fetches the default set of items from the server.
+  //} TODO: Check etags, cache control etc. Don't need to fetch all the time.
+  Cache.prototype._fetch = function() {
+
+    $.ajax({
+      url: this.uri,
+      dataType: 'json',
+      success: _.bind(this._onFetch, this),
+      error: function(xhr, textStatus) {
+        this.tryCount = this.tryCount || 0;
+        this.tryCount++;
+        if (this.tryCount <= 3) {
+          _.log("retrying");
+          $.ajax(this);
+          return;
+        }
+        _.logf("Unable to retrieve data from {0}. Status was {1}", this.url, textStatus);
+      }
+    });
+
+  };
+
+  // Validates the format of the received data and saves it in HTML5 local
+  // storage. Invoked when the #_fetch() succeeds.
+  Cache.prototype._onFetch = function(data){
     _.assert(SCHEMA.data, data.type);
-    //} TODO: insert instead of override?
-    amplify.store(_key(collection), data.items);
+    amplify.store(this.key, data.items);
+    this.onData(data.items);
   };
 
-  // Sets the collection in the cache, with the given array of items.
-  var set = function(collection, items) {
-    // Throws an error if the collection name is undefined or empty.
-    if (_.isEmpty(collection)) throw {error: 'collection name must not be empty.'};
-    amplify.store(_key(collection), items);
-    //} TODO: sync?
-  };
+  return Cache;
 
-  // Removes a collection from the cache.
-  var unset = function(collection) {
-    // Throws an error if the collection name is undefined or empty.
-    if (_.isEmpty(collection)) throw {error: 'collection name must not be empty.'};
-    amplify.store(_key(collection), null);
-  };
-
-  var insert = function(collection, doc) {
-    if (_.isEmpty(collection)) throw {error: 'collection name must not be empty.'};
-    var inserted = amplify.store(_key(collection)).concat(doc);
-    amplify.store(_key(collection), inserted);
-    //} TODO: sync?
-  };
-
-  // Subscribes to a published collection and keeps a cached copy of the records in
-  // HTML5 local storage.
-  var subscribe = function(collection, callback){
-
-    // Throws error if `collection` is undefined or empty.
-    if (_.isEmpty(collection)) throw {error: 'model must not be undefined or empty.'};
-
-    var uri = _('{0}{1}.reaction').format(config.paths.root, collection);
-
-    //} TODO: callback
-
-    $.getJSON(uri)
-      .success(_.curry(_data_handler, collection))
-      .error(function(xhr, textStatus, errorThrown){
-        // TODO: could be user error, or network
-        _.log(xhr, textStatus, errorThrown);
-      });
-
-  };
-
-  var get = function(collection) {
-    if (_.isEmpty(collection)) throw {error: 'collection name must not be empty.'};
-    return amplify.store(_key(collection));
-  };
-
-  return {
-    subscribe: subscribe,
-    has: has,
-    insert: insert,
-    get: get,
-    set: set,
-    unset: unset
-  };
 
 });
-

@@ -1,5 +1,5 @@
 /* ========================================================================
- * collection.js v0.0.1.1
+ * collection.js v0.0.1
  * http://github.com/jimjh/reaction
  * ========================================================================
  * Copyright (c) 2012 Carnegie Mellon University
@@ -7,81 +7,75 @@
  * ========================================================================
  */
 /*jshint strict:true unused:true*/
-/*global _:true*/
+/*global _:true Backbone:true $:true*/
+
+//} TODO: improve documentation.
 
 // # reaction-collection Module
-//} TODO: need to somehow remember which collections are synced and which
-//  aren't
-define(['./cache', './config', './util'], function(cache){
+define(['reaction/cache', 'reaction/config', 'reaction/util', 'backbone'],
+       function(Cache) {
 
   'use strict';
 
-  var insert = function(doc) {
-    cache.insert(this.name, doc);
-  };
+  var Collection = Backbone.Collection.extend({
 
-  var remove = function() {
-    _.log('remove!');
-  };
+    // Creates a new collection tied to a Rails model of the same name.
+    // Options:
+    // * `onReady`: invoked when the DOM has been fully loaded and the data is
+    //              ready. This can't be an event, because there is no
+    //              guarantee that the handler will be registered before the
+    //              event is fired. Takes an `events` parameter.
+    //}             XXX: maybe this can be a parameter on its own.
+    initialize: function(name, options) {
 
-  var find = function() {
-    // TODO
-    return cache.get(this.name);
-  };
+      // Throws error if `name` is undefined or empty.
+      if (_.isEmpty(name)) throw {error: 'model must not be undefined or empty.'};
 
-  var _add_methods = function(obj) {
-    obj.insert = insert;
-    obj.remove = remove;
-    obj.find = find;
-    return obj;
-  };
+      var that = this;
+      this.name = name;
+      options = _.defaults(options || {}, {
+        onReady: function(){}
+      });
 
-  // The 'meta' collection keeps an array of existing collections in the local
-  // storage. It's initialized on startup.
-  var meta_collection = null;
-  if (!cache.has('meta')) cache.set('meta', []);
-  meta_collection = _add_methods({ name: 'meta' });
+      // onData is invoked by the cache when the data is ready.
+      options.onData = function(items){
+        that.reset(items);
+        $(options.onReady(items));
+      };
 
-  // ## Creating a persistent collection
-  //
-  // ### Examples
-  //     // create a new collection with data from cache/server
-  //     reaction.collection('posts');
-  //     // create a new collection containing [{..},{..},{..}]
-  //     reaction.collection('posts', [{..}, {..}, {..}]);
-  //     // create a new collection containing an empty array.
-  //     reaction.collection('ints', []);
-  var constructor = function(name, items, options) {
+      this.cache = new Cache(name, options);
 
-    var that = _add_methods({ name: name });
+    },
 
-    // ### Options
-    // * `onData`: A callback function that is executed when data is received.
-    //             This will be invoked immediately if `items` is specified.
-    //             Optional.
-    options = _.defaults(options || {}, {
-      onData: function(){}
-    });
+    // Overrides Backbone.sync to use Reaction.Cache.
+    sync: function(method, model, options) {
 
-    if (_.isUndefined(items)) {
-      // If the second argument (`items`) is not specified, the collection is
-      // automatically subscribed to a published model of the same name.
-      //} TODO: need some way to callback when data is received.
-      cache.subscribe(name, options.onData);
-    } else {
-      // Otherwise, `items` is persisted in local storage. An error is thrown
-      // if `items` is not an array.
-      if (!_.isArray(items)) throw {error: 'items must be an array.'};
-      cache.set(name, items);
-      _.defer(options.onData);
+      var resp;
+      var cache = this.cache;
+
+      switch(method) {
+        case 'read':
+          resp = model.id ? cache.find(model) : cache.findAll();
+          break;
+        case 'create':
+          resp = cache.create(model);
+          break;
+        case 'update':
+          resp = cache.update(model);
+          break;
+        case 'delete':
+          resp = cache.destroy(model);
+          break;
+      }
+
+      if (resp) options.success(resp);
+      else options.error("Record not found.");
+
     }
 
-    meta_collection.insert({name: name});
+  });
 
-    return that;
-
-  };
-
-  return constructor;
+  return Collection;
 
 });
+
