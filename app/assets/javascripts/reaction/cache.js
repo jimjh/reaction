@@ -92,7 +92,7 @@ define(['reaction/config', 'reaction/util', 'amplify', 'faye/client'],
     this._subscribe();
   };
 
-  // Subscribe to changes.
+  // Subscribe to Faye channel for changes.
   // FIXME: probably should use client-specific channels.
   Cache.prototype._subscribe = function() {
     this.client = new Faye.Client(config.paths.bayeux);

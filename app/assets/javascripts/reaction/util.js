@@ -55,8 +55,19 @@ define(['underscore'], function(){
   //
   //      function add(a, b){ return a + b; }
   //      _.curry(add, 1); //=> a function that increments its argument
-  var curry = function(func, args)  {
+  var curry = function(func, args) {
     return _.bind(func, this, args);
+  };
+
+  var S4 = function() {
+    return (((1 + Math.random())*0x10000)|0).toString(16).substring(1);
+  };
+
+  // Generates pseudo-random string by concatenating random hexadecimal.
+  //
+  //      _.uuid(); //>> random string
+  var uuid = function() {
+    return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
   };
 
   _.mixin({
@@ -64,7 +75,8 @@ define(['underscore'], function(){
     logf: logf,
     format: format,
     assert: assert,
-    curry: curry
+    curry: curry,
+    uuid: uuid
   });
 
 });
