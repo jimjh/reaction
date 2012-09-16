@@ -50,46 +50,35 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
   };
 
   // Creates a new cache that is sync'ed with a Rails model of the same name.
-  // Options:
-  // * `onData`: invoked when the data is ready.
-  var Cache = function(collection, options) {
+  var Cache = function(collection) {
 
     // Throws error if `collection` is undefined.
     if (_.isUndefined(collection)) throw {error: 'collection is required.'};
 
-    // Ensure that the options dictionary is valid.
-    options = _.defaults(options || {}, {
-      onData: function(){}
-    });
-
     this.collection = collection;
     this.uri = _('{0}{1}').format(config.paths.root, collection.name);
     this.key = key(collection.name);
-    this.onData = options.onData;
-
-    // Fetch the default set of records.
-    _.defer(_.bind(this._fetch, this));
 
   };
 
   // Fetches the default set of items from the server.
   //} TODO: Check etags, cache control etc. Don't need to fetch all the time.
-  Cache.prototype._fetch = function() {
+  Cache.prototype.fetch = function(model, options) {
     $.ajax({
       url: this.uri + '.reaction',
       dataType: 'json',
-      success: _.bind(this._onFetch, this),
-      error: function(xhr, textStatus){ retry.apply(this, [xhr, textStatus]); }
+      success: _.bind(this._onFetch, this, model, options.success),
+      error: options.error
     });
   };
 
   // Validates the format of the received data and saves it in HTML5 local
   // storage. Invoked when #_fetch() succeeds.
-  Cache.prototype._onFetch = function(data) {
-    _.assert(SCHEMA.data, data.type);
-    this._storeList(data.items);
-    this.onData(data.items);
+  Cache.prototype._onFetch = function(model, success, resp, status, xhr) {
+    _.assert(SCHEMA.data, resp.type);
+    this._storeList(resp.items);
     this._subscribe();
+    success(resp.items, status, xhr);
   };
 
   // Subscribe to Faye channel for changes.

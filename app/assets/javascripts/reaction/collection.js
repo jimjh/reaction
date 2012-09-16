@@ -24,30 +24,13 @@ define(['reaction/cache', 'reaction/model', 'reaction/sync', 'backbone'],
     model: Model,
 
     // Creates a new collection tied to a Rails model of the same name.
-    // Options:
-    // * `onReady`: invoked when the DOM has been fully loaded and the data is
-    //              ready. This can't be an event, because there is no
-    //              guarantee that the handler will be registered before the
-    //              event is fired. Takes an `events` parameter.
-    //}             XXX: maybe this can be a parameter on its own.
-    initialize: function(name, options) {
+    initialize: function(name) {
 
       // Throws error if `name` is undefined or empty.
       if (_.isEmpty(name)) throw {error: 'name must not be undefined or empty.'};
 
-      var that = this;
       this.name = name;
-      options = _.defaults(options || {}, {
-        onReady: function(){}
-      });
-
-      // onData is invoked by the cache when the data is ready.
-      options.onData = function(items){
-        that.reset(items);
-        $(options.onReady(items));
-      };
-
-      this.cache = new Cache(this, options);
+      this.cache = new Cache(this);
 
     },
 

@@ -33,7 +33,7 @@ define(['reaction/util'], function(){
     switch(method) {
       case 'read':
         if (model.id) cache.find(model, options);
-        else cache.findAll(options);
+        else cache.fetch(model, options);
         break;
       case 'create':
         cache.create(model, options);
