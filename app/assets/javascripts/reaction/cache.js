@@ -58,6 +58,7 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
     this.collection = collection;
     this.uri = _('{0}{1}').format(config.paths.root, collection.name);
     this.key = key(collection.name);
+    this._subscribe();
 
   };
 
@@ -77,7 +78,6 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
   Cache.prototype._onFetch = function(model, success, resp, status, xhr) {
     _.assert(SCHEMA.data, resp.type);
     this._storeList(resp.items);
-    this._subscribe();
     success(resp.items, status, xhr);
   };
 
