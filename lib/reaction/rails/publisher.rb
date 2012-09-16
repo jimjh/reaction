@@ -54,6 +54,20 @@ module Reaction
         request.format.reaction?
       end
 
+      # Broadcasts the specified action to all subscribed clients.
+      # @example
+      #   broadcast create: @post
+      # TODO: smarter broadcast w. auto detect
+      # TODO: authorization
+      # TODO: don't send to the client that initiated the change
+      def broadcast(options)
+        # TODO: complete for other actions
+        if options.include? :create
+          delta = Serializer.format_data(options[:create])
+          Reaction.bayeux.get_client.publish('/' + self.controller_name, delta)
+        end
+      end
+
     end
 
   end

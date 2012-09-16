@@ -12,12 +12,16 @@
 //} TODO: improve documentation.
 
 // # reaction-collection Module
-define(['reaction/cache', 'reaction/config', 'reaction/util', 'backbone'],
-       function(Cache) {
+define(['reaction/cache', 'reaction/model', 'reaction/sync', 'backbone'],
+       function(Cache, Model, sync) {
 
   'use strict';
 
+  // ## Reaction.Collection
+  // Uses `Reaction.Model` by default.
   var Collection = Backbone.Collection.extend({
+
+    model: Model,
 
     // Creates a new collection tied to a Rails model of the same name.
     // Options:
@@ -29,7 +33,7 @@ define(['reaction/cache', 'reaction/config', 'reaction/util', 'backbone'],
     initialize: function(name, options) {
 
       // Throws error if `name` is undefined or empty.
-      if (_.isEmpty(name)) throw {error: 'model must not be undefined or empty.'};
+      if (_.isEmpty(name)) throw {error: 'name must not be undefined or empty.'};
 
       var that = this;
       this.name = name;
@@ -43,35 +47,12 @@ define(['reaction/cache', 'reaction/config', 'reaction/util', 'backbone'],
         $(options.onReady(items));
       };
 
-      this.cache = new Cache(name, options);
+      this.cache = new Cache(this, options);
 
     },
 
     // Overrides Backbone.sync to use Reaction.Cache.
-    sync: function(method, model, options) {
-
-      var resp;
-      var cache = this.cache;
-
-      switch(method) {
-        case 'read':
-          resp = model.id ? cache.find(model) : cache.findAll();
-          break;
-        case 'create':
-          resp = cache.create(model);
-          break;
-        case 'update':
-          resp = cache.update(model);
-          break;
-        case 'delete':
-          resp = cache.destroy(model);
-          break;
-      }
-
-      if (resp) options.success(resp);
-      else options.error("Record not found.");
-
-    }
+    sync: sync
 
   });
 

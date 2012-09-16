@@ -17,6 +17,6 @@ requirejs.config({
         }
 });
 
-require(['reaction'], function(reaction) {
+require(['reaction', 'faye/client'], function(reaction) {
   Reaction = reaction;
 });

@@ -9,14 +9,15 @@
 /*jshint strict:true unused:true*/
 
 // ## reaction Module
-define(['reaction/config', 'reaction/cache', 'reaction/collection'],
-       function(config, cache, collection){
+define(['reaction/config', 'reaction/cache', 'reaction/model', 'reaction/collection'],
+       function(config, cache, model, collection){
 
   'use strict';
 
   return {
     config: config,
     Cache: cache,
+    Model: model,
     Collection: collection
   };
 

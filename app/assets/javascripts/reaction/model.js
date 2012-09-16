@@ -1,5 +1,5 @@
 /* ========================================================================
- * config.js v0.0.1.1
+ * model.js v0.0.1
  * http://github.com/jimjh/reaction
  * ========================================================================
  * Copyright (c) 2012 Carnegie Mellon University
@@ -7,16 +7,20 @@
  * ========================================================================
  */
 /*jshint strict:true unused:true*/
+/*global Backbone:true*/
 
-// ## reaction-config Module
-// Simple object containing configuration options for the client reaction
-// library.
-define(function(){
+// # reaction-model Module.
+define(['reaction/sync', 'backbone'], function(sync){
+
   'use strict';
-  return {
-    paths: {         // TODO: should be provided by rails
-      root: '/',
-      bayeux: '/reaction/bayeux'
-    }
-  };
+
+  // ## Reaction.Model
+  // Extend this to provide your own models. Must provide `name`.
+  var Model = Backbone.Model.extend({
+    name: 'post',
+    sync: sync
+  });
+
+  return Model;
+
 });
