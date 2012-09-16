@@ -37,6 +37,7 @@ module Reaction
       # @return [void]
       def self.included(base)
         base.respond_to :reaction
+        base.before_filter :filter_before_reaction
       end
 
       # Renders given resource in the reaction format.
@@ -54,17 +55,26 @@ module Reaction
         request.format.reaction?
       end
 
+      # Ensures that the user's session has a generated channel id.
+      def filter_before_reaction
+        cookies[:channel_id] = SecureRandom.uuid unless cookies.include? :channel_id
+      end
+
       # Broadcasts the specified action to all subscribed clients.
       # @example
       #   broadcast create: @post
       # TODO: smarter broadcast w. auto detect
       # TODO: authorization
       # TODO: don't send to the client that initiated the change
+      # XXX: use an after filter?
       def broadcast(options)
         # TODO: complete for other actions
         if options.include? :create
           delta = Serializer.format_data(options[:create])
-          Reaction.bayeux.get_client.publish('/' + self.controller_name, delta)
+          Reaction.registry.each do |channel_id|
+            next if channel_id == cookies[:channel_id]
+            Reaction.bayeux.get_client.publish("/#{self.controller_name}/#{channel_id}", delta)
+          end
         end
       end
 

@@ -1,3 +1,4 @@
+require 'set'
 require 'faye'
 require 'reaction/version'
 
@@ -12,6 +13,10 @@ module Reaction
 
     # only one bayeux server per process for now
     attr_accessor :bayeux
+
+    # @!attribute [rw] registry
+    #   @return [Reaction::Registry] registry of connected clients.
+    attr_accessor :registry
 
     # @!attribute [r] paths
     #   @return [Paths] struct containing some convenience paths.
@@ -37,6 +42,7 @@ module Reaction
 
   require_package :adapters
   require_package :deps
+  require_package :registry
   require_package :rails if in_rails?
 
 end

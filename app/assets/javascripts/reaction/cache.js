@@ -13,8 +13,8 @@
 //} TODO: refactor this file - too much duplicate code.
 
 // ## reaction-cache Module
-define(['reaction/config', 'reaction/util', 'amplify', 'faye/client'],
-       function(config) {
+define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'faye/client'],
+       function(config, identifier) {
 
   'use strict';
 
@@ -96,7 +96,9 @@ define(['reaction/config', 'reaction/util', 'amplify', 'faye/client'],
   // FIXME: probably should use client-specific channels.
   Cache.prototype._subscribe = function() {
     this.client = new Faye.Client(config.paths.bayeux);
-    this.client.subscribe('/' + this.collection.name, _.bind(this._onDelta, this));
+    this.client.addExtension(identifier);
+    var endpoint = _('/{0}/{1}').format(this.collection.name, _.cookie('channel_id'));
+    this.client.subscribe(endpoint, _.bind(this._onDelta, this));
   };
 
   // Invoked on delta from server.

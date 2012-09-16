@@ -7,7 +7,7 @@
  * ========================================================================
  */
 /*jshint strict:true unused:true*/
-/*global console:true _:true window:true*/
+/*global console:true _:true window:true document:true*/
 
 // ## reaction-util Module
 // Collection of utility functions that I like.
@@ -70,13 +70,49 @@ define(['underscore'], function(){
     return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
   };
 
+  // Finds all cookies, adapted from a [gist][1].
+  //
+  //      _.cookies();  //=> associative array of all cookies.
+  //
+  //   [1]: https://gist.github.com/992303
+  var cookies =  function() {
+    var _cookies = {};
+    _(document.cookie.split(';'))
+      .chain()
+      .map(function(m) { return m.replace(/^\s+/, '').replace(/\s+$/, ''); })
+      .each(function(c) {
+      var arr = c.split('='),
+          key = arr[0],
+          value = null;
+      var size = _.size(arr);
+      if (size > 1) value = arr.slice(1).join('');
+      _cookies[key] = value;
+    });
+    return _cookies;
+  };
+
+  // Finds the value for the specific cookie.
+  //
+  //      _.cookie('id'); //=> returns value of `id`
+  var cookie = function(name) {
+     var cookie = null,
+         list = _.cookies();
+
+     _.each(list, function(value, key) {
+        if (key === name) cookie = value;
+     });
+     return cookie;
+  };
+
   _.mixin({
     log: log,
     logf: logf,
     format: format,
     assert: assert,
     curry: curry,
-    uuid: uuid
+    uuid: uuid,
+    cookies: cookies,
+    cookie: cookie
   });
 
 });

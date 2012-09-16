@@ -26,7 +26,10 @@ module ActionDispatch::Routing
       server = opts.delete :server
 
       Faye::WebSocket.load_adapter server
+      # FIXME: is an in-memory registry suitable?
+      Reaction.registry = Reaction::Registry.new
       Reaction.bayeux = Reaction::Adapters::RackAdapter.new(opts)
+
       mount Reaction.bayeux, at: path
 
     end
@@ -37,7 +40,11 @@ module ActionDispatch::Routing
     # @param [Hash] opts          hash of options
     # @return [Hash] defaultized options
     def defaultize(opts)
-      defaults = {at: '/reaction', server: 'thin'}
+      defaults = {
+        at: '/reaction',
+        server: 'thin',
+        extensions: [Reaction::Registry::Monitor.new]
+      }
       opts = defaults.merge opts
       opts[:mount] = '/bayeux' # force!
       opts
