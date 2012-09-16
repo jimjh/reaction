@@ -1,3 +1,5 @@
+//} TODO: how I should release this in the most compatible manner?
+
 requirejs.config({
   shim: {
           'backbone': {
@@ -17,6 +19,6 @@ requirejs.config({
         }
 });
 
-require(['reaction', 'faye/client'], function(reaction) {
+require(['reaction'], function(reaction) {
   Reaction = reaction;
 });

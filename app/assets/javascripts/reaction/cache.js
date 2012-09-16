@@ -129,6 +129,7 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
   // copy of it on local storage.
   Cache.prototype.create = function(model, options) {
 
+    // Prepare data in Rails format.
     var data = {};
     data[model.name] = model.attributes;
 

@@ -5,6 +5,7 @@ module Reaction
     # Watches Faye for subscribe and disconnect.
     class Monitor
 
+      # Intercepts incoming subscription requests and registers channel ids.
       def incoming(message, callback)
 
         # Let non-subscribe messages through

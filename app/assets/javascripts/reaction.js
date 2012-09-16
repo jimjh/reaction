@@ -8,7 +8,11 @@
  */
 /*jshint strict:true unused:true*/
 
-// ## reaction Module
+// # Reaction Client
+// Interacts with the reaction server to bring reactivity to Ruby webapps.
+// Currently only supports Rails.
+//
+// See main.js for an example of how to include this in your app.
 define(['reaction/config', 'reaction/cache', 'reaction/model', 'reaction/collection'],
        function(config, cache, model, collection){
 
