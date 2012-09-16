@@ -57,7 +57,7 @@ module Reaction
 
       # Ensures that the user's session has a generated channel id.
       def filter_before_reaction
-        cookies[:channel_id] = SecureRandom.uuid unless cookies.include? :channel_id
+        cookies[:channel_id] = SecureRandom.uuid unless cookies.key? :channel_id
       end
 
       # Broadcasts the specified action to all subscribed clients.
