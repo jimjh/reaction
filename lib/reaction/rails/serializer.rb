@@ -40,6 +40,7 @@ module Reaction
         private
 
         def format_obj(obj)
+          return 'null' if obj.nil?
           response = { type: 'datum', item: obj }
           response[:errors] = obj.errors if obj.errors.any?
           response.to_json
