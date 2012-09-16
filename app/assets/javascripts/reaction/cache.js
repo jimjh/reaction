@@ -111,8 +111,6 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
         // FIXME: this duplicates _onCreate
         this._storeItem(delta.item);
         var model = this.collection.get(delta.item.id);
-        _.log(delta.item.id);
-        _.log(model);
         if (model) {
           model.set(delta.item);
         } else {
