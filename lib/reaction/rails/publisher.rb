@@ -65,17 +65,17 @@ module Reaction
       #   broadcast create: @post
       # TODO: smarter broadcast w. auto detect
       # TODO: authorization
-      # TODO: don't send to the client that initiated the change
-      # XXX: use an after filter?
+      # TODO: use an after filter?
       def broadcast(options)
-        # TODO: complete for other actions
-        if options.include? :create
-          delta = Serializer.format_data(options[:create])
+
+        options.each { |action, delta|
+          delta = Serializer.format_data delta.attributes, action: action
           Reaction.registry.each do |channel_id|
             next if channel_id == cookies[:channel_id]
             Reaction.bayeux.get_client.publish("/#{self.controller_name}/#{channel_id}", delta)
           end
-        end
+        }
+
       end
 
     end

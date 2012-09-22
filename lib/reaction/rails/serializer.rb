@@ -29,25 +29,25 @@ module Reaction
         # @param [Enumerable] obj                 some collection of
         #                                         objects to publish
         # @return [String] formatted json
-        def format_data(obj)
-          if obj.is_a? Enumerable
-            format_array(obj)
+        def format_data(obj, opts = {})
+          if obj.is_a? Array
+            format_array obj, opts
           else
-            format_obj(obj)
+            format_obj obj, opts
           end
         end
 
         private
 
-        def format_obj(obj)
+        def format_obj(obj, opts)
           return 'null' if obj.nil?
-          response = { type: 'datum', item: obj }
-          response[:errors] = obj.errors if obj.errors.any?
+          response = { type: 'datum', item: obj }.merge opts
+          response[:errors] = obj.errors if obj.respond_to? :errors and obj.errors.any?
           response.to_json
         end
 
-        def format_array(arr)
-          { type: 'data', items: arr }.to_json
+        def format_array(arr, opts)
+          { type: 'data', items: arr }.merge(opts).to_json
         end
 
       end

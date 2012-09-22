@@ -94,20 +94,24 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
   // Responds to changes on server and propagates them to the client.
   Cache.prototype._onDelta = function(message) {
 
-    // TODO: complete
     var delta = $.parseJSON(message);
-    switch (delta.type) {
-      case SCHEMA.datum:
-        // FIXME: this duplicates _onCreate
-        this._storeItem(delta.item);
-        var model = this.collection.get(delta.item.id);
-        if (model) {
-          model.set(delta.item);
-        } else {
-          this.collection.add(new this.collection.model(delta.item));
-        }
+    var that = this;
+
+    switch (delta.action) {
+      case 'create':
+        that._onCreate(null, function(item) {
+          that.collection.add(new that.collection.model(item));
+        }, delta);
         break;
-      case SCHEMA.data:
+      case 'update':
+        that._onUpdate(null, function(item) {
+          that.collection.get(item.id).set(item);
+        }, delta);
+        break;
+      case 'destroy':
+        that._onDestroy(null, function(item) {
+          that.collection.remove(item.id);
+        }, delta);
         break;
     }
 
@@ -155,10 +159,10 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
 
   // Validates format of the received data and saves it in a HTML5 local
   // storage. Invoked when `update()` succeeds.
-  Cache.prototype._onUpdate = function(model, success, resp) {
+  Cache.prototype._onUpdate = function(model, success, resp, status, xhr) {
     _.assert(SCHEMA.datum, resp.type);
     this._storeItem(resp.item);
-    success(resp);
+    success(resp.item, status, xhr);
   };
 
   // Makes a DELETE request to delete the model on the server, and then updates
@@ -176,10 +180,10 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
 
   // Validates the format of the received data and saves it in a HTML5 local
   // storage. Invoked when `destroy()` succeeds.
-  Cache.prototype._onDestroy = function(model, success, resp) {
+  Cache.prototype._onDestroy = function(model, success, resp, status, xhr) {
     _.assert(SCHEMA.datum, resp.type);
     this._removeItem(resp.item);
-    success(resp);
+    success(resp.item, status, xhr);
   };
 
   // Stores the given list into HTML5 local storage.
