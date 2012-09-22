@@ -9,9 +9,6 @@
 /*jshint strict:true unused:true*/
 /*global _:true $:true amplify:true Faye:true*/
 
-//} TODO: propagate errors to user.
-//} TODO: refactor this file - too much duplicate code.
-
 // ## reaction-cache Module
 define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'faye/client'],
        function(config, identifier) {
@@ -62,15 +59,20 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
 
   };
 
+  // Makes an AJAX request using the given options.
+  Cache.prototype._ajax = function(options) {
+    _.defaults(options, {
+      url: this.uri + '.reaction',
+      dataType: 'json'
+    });
+    $.ajax(options);
+  };
+
   // Fetches the default set of items from the server.
   //} TODO: Check etags, cache control etc. Don't need to fetch all the time.
   Cache.prototype.fetch = function(model, options) {
-    $.ajax({
-      url: this.uri + '.reaction',
-      dataType: 'json',
-      success: _.bind(this._onFetch, this, model, options.success),
-      error: options.error
-    });
+    options.success =  _.bind(this._onFetch, this, model, options.success);
+    this._ajax(options);
   };
 
   // Validates the format of the received data and saves it in HTML5 local
@@ -81,8 +83,7 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
     success(resp.items, status, xhr);
   };
 
-  // Subscribe to Faye channel for changes.
-  // FIXME: probably should use client-specific channels.
+  // Subscribe to Faye channel for changes. Uses one channel for each client.
   Cache.prototype._subscribe = function() {
     this.client = new Faye.Client(config.paths.bayeux);
     this.client.addExtension(identifier);
@@ -90,7 +91,7 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
     this.client.subscribe(endpoint, _.bind(this._onDelta, this));
   };
 
-  // Invoked on delta from server.
+  // Responds to changes on server and propagates them to the client.
   Cache.prototype._onDelta = function(message) {
 
     // TODO: complete
@@ -120,14 +121,10 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
     var data = {};
     data[this.collection.model_name] = model.attributes;
 
-    $.ajax({
-      url: this.uri + '.reaction',
-      type: 'POST',
-      dataType: 'json',
-      data: data,
-      success: _.bind(this._onCreate, this, model, options.success),
-      error: options.error
-    });
+    // Prepare options dict, make AJAX call.
+    _.defaults(options, { type: 'POST', data: data });
+    options.success = _.bind(this._onCreate, this, model, options.success);
+    this._ajax(options);
 
   };
 
@@ -139,26 +136,49 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
     success(resp.item, status, xhr);
   };
 
+  // Makes a PUT request to update a model on the server, and then updates the
+  // copy in the local storage.
+  Cache.prototype.update = function(model, options) {
+
+    var data = {};
+    data[this.collection.model_name] = model.attributes;
+
+    _.defaults(options, {
+      type: 'PUT',
+      url: _('{0}/{1}.reaction').format(this.uri, model.id),
+      data: data
+    });
+    options.success = _.bind(this._onUpdate, this, model, options.success);
+    this._ajax(options);
+
+  };
+
+  // Validates format of the received data and saves it in a HTML5 local
+  // storage. Invoked when `update()` succeeds.
+  Cache.prototype._onUpdate = function(model, success, resp) {
+    _.assert(SCHEMA.datum, resp.type);
+    this._storeItem(resp.item);
+    success(resp);
+  };
+
   // Makes a DELETE request to delete the model on the server, and then updates
   // local storage.
   Cache.prototype.destroy = function(model, options) {
 
-    $.ajax({
-      url: _('{0}/{1}.reaction').format(this.uri, model.id),
+    _.defaults(options, {
       type: 'DELETE',
-      dataType: 'json',
-      success: _.bind(this._onDestroy, this, model, options.success),
-      error: options.error
+      url: _('{0}/{1}.reaction').format(this.uri, model.id)
     });
+    options.success = _.bind(this._onDestroy, this, model, options.success);
+    this._ajax(options);
 
   };
 
   // Validates the format of the received data and saves it in a HTML5 local
-  // storage. Invoked when #destroy succeeds.
+  // storage. Invoked when `destroy()` succeeds.
   Cache.prototype._onDestroy = function(model, success, resp) {
-    // TODO:
-    _.log('destroyed');
-    _.log(resp);
+    _.assert(SCHEMA.datum, resp.type);
+    this._removeItem(resp.item);
     success(resp);
   };
 
@@ -174,6 +194,13 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
   Cache.prototype._storeItem = function(item) {
     var dict = amplify.store(this.key);
     dict[item.id] = item;
+    amplify.store(this.key, dict);
+  };
+
+  // Removes the given item from the HTML5 local storage.
+  Cache.prototype._removeItem = function(item) {
+    var dict = amplify.store(this.key);
+    delete dict[item.id];
     amplify.store(this.key, dict);
   };
 

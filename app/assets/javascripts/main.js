@@ -21,6 +21,6 @@ requirejs.config({
 
 require(['reaction'], function(reaction) {
   Reaction = reaction;
-  // XXX: temporary
+  //} FIXME: temporary
   $(window).trigger('reaction_loaded');
 });

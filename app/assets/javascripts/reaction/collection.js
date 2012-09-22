@@ -9,9 +9,17 @@
 /*jshint strict:true unused:true*/
 /*global _:true Backbone:true */
 
-//} TODO: improve documentation.
-
 // # reaction-collection Module
+// Usage:
+//
+//      var collection = new Reaction.Collection({
+//        controller_name: 'posts,
+//        model_name: 'post
+//      });
+//
+//      collection.bind(..., ...);
+//
+//      collection.fetch(); // fires the add events
 define(['reaction/cache', 'reaction/model', 'reaction/sync', 'reaction/util', 'backbone'],
        function(Cache, Model, sync) {
 

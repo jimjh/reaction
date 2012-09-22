@@ -9,6 +9,7 @@
 /*jshint strict:true unused:true*/
 
 // # reaction-sync Module
+// Provides a sync function for Backbone that uses a write-through cache.
 define(['reaction/util'], function(){
 
   'use strict';
@@ -39,7 +40,7 @@ define(['reaction/util'], function(){
         cache.create(model, options);
         break;
       case 'update':
-        cache.update(model);
+        cache.update(model, options);
         break;
       case 'delete':
         cache.destroy(model, options);

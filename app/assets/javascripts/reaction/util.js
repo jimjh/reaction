@@ -116,7 +116,7 @@ define(['underscore'], function(){
 
   // Logs the error message and throws an error.
   //
-  //      _.fatal("{0} is required.", "controller_name")
+  //      _.fatal("{0} is required.", "controller_name");
   var fatal = function() {
     var error = _.format.apply(this, arguments);
     _.warn(error);
