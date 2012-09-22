@@ -7,12 +7,12 @@
  * ========================================================================
  */
 /*jshint strict:true unused:true*/
-/*global _:true Backbone:true $:true*/
+/*global _:true Backbone:true */
 
 //} TODO: improve documentation.
 
 // # reaction-collection Module
-define(['reaction/cache', 'reaction/model', 'reaction/sync', 'backbone'],
+define(['reaction/cache', 'reaction/model', 'reaction/sync', 'reaction/util', 'backbone'],
        function(Cache, Model, sync) {
 
   'use strict';
@@ -24,12 +24,17 @@ define(['reaction/cache', 'reaction/model', 'reaction/sync', 'backbone'],
     model: Model,
 
     // Creates a new collection tied to a Rails model of the same name.
-    initialize: function(name) {
+    initialize: function(opts) {
 
-      // Throws error if `name` is undefined or empty.
-      if (_.isEmpty(name)) throw {error: 'name must not be undefined or empty.'};
+      // Throws error if opts is empty.
+      if (_.isEmpty(opts)) _.fatal('Opts is required.');
 
-      this.name = name;
+      // Throws error if `controller_name` or `model_name` is undefined or empty.
+      if (_.isEmpty(opts.controller_name)) _.fatal('Controller name must not be undefined or empty.');
+      if (_.isEmpty(opts.model_name)) _.fatal('Model name must not be undefined or empty.');
+
+      this.controller_name = opts.controller_name;
+      this.model_name = opts.model_name;
       this.cache = new Cache(this);
 
     },

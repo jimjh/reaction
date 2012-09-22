@@ -56,8 +56,8 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
     if (_.isUndefined(collection)) throw {error: 'collection is required.'};
 
     this.collection = collection;
-    this.uri = _('{0}{1}').format(config.paths.root, collection.name);
-    this.key = key(collection.name);
+    this.uri = _('{0}{1}').format(config.paths.root, collection.controller_name);
+    this.key = key(collection.controller_name);
     this._subscribe();
 
   };
@@ -86,7 +86,7 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
   Cache.prototype._subscribe = function() {
     this.client = new Faye.Client(config.paths.bayeux);
     this.client.addExtension(identifier);
-    var endpoint = _('/{0}/{1}').format(this.collection.name, _.cookie('channel_id'));
+    var endpoint = _('/{0}/{1}').format(this.collection.controller_name, _.cookie('channel_id'));
     this.client.subscribe(endpoint, _.bind(this._onDelta, this));
   };
 
@@ -118,7 +118,7 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
 
     // Prepare data in Rails format.
     var data = {};
-    data[model.name] = model.attributes;
+    data[this.collection.model_name] = model.attributes;
 
     $.ajax({
       url: this.uri + '.reaction',

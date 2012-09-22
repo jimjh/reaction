@@ -24,6 +24,16 @@ define(['underscore'], function(){
     if(!no_logger) _.each(arguments, function(m){ console.log(m); });
   };
 
+  // Wrapper for `console.warn` that proxies to `_.log` if `console.warn` is
+  // not defined.
+  //
+  //      _.warn('hello world.'); //> 'hello world'
+  var warn = function() {
+    var no_warner = (_.isUndefined(window.console) || _.isUndefined(console.warn));
+    if (!no_warner) _.each(arguments, function(w){ console.warn(w); });
+    else _.log.apply(this, arguments);
+  };
+
   // Sprintf + Log.
   //
   //      _.logf("{0} and {1}", "hello", "bye") //>> hello and bye
@@ -48,7 +58,7 @@ define(['underscore'], function(){
   //      _.assert(0, 1); //>> throws error
   var assert = function(expected, actual) {
     if (expected === actual) return;
-    throw {error: _('expected {0}, got {1}').format(expected, actual)};
+    _.fatal('Expected {0}, got {1}.', expected, actual);
   };
 
   // Curry function (prefilling args.)
@@ -104,10 +114,21 @@ define(['underscore'], function(){
      return cookie;
   };
 
+  // Logs the error message and throws an error.
+  //
+  //      _.fatal("{0} is required.", "controller_name")
+  var fatal = function() {
+    var error = _.format.apply(this, arguments);
+    _.warn(error);
+    throw {error: error};
+  };
+
   _.mixin({
     log: log,
+    warn: warn,
     logf: logf,
     format: format,
+    fatal: fatal,
     assert: assert,
     curry: curry,
     uuid: uuid,

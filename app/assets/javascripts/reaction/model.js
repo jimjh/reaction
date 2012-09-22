@@ -15,9 +15,7 @@ define(['reaction/sync', 'backbone'], function(sync){
   'use strict';
 
   // ## Reaction.Model
-  // Extend this to provide your own models. Must provide `name`.
   var Model = Backbone.Model.extend({
-    name: 'post',
     sync: sync
   });
 
