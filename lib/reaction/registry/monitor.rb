@@ -1,26 +1,52 @@
 module Reaction
 
+  # --
+  # XXX: BAD CODE.
+  # * Channel ID is confusing, because we have faye channels, and then reaction's
+  #   channel IDs.
+  # * Client ID is confusing. There is the client ID that the client uses to
+  #   check for origin of deltas, and then there is faye's client IDs.
   class Registry
 
-    # Watches Faye for subscribe and disconnect.
+    # Watches Faye for connect and disconnect.
     class Monitor
 
-      # Intercepts incoming subscription requests and registers channel ids.
+      # Intercepts connection requests and registers client id with channel ids.
+      # Intercepts disconnect requests and unregisters client id.
       def incoming(message, callback)
 
-        # Let non-subscribe messages through
-        unless message['channel'] == '/meta/subscribe'
+        # Let non-connect and non-disconnect messages through.
+        unless is_connection? message
           return callback.call(message)
         end
 
-        unless message.include? 'channel_id'
-          message['error'] = 'Invalid subscription.'
+        unless message.include? 'channel_id' and message.include? 'clientId'
+          message['error'] = 'Invalid connection.'
           return callback.call(message)
         end
 
-        Reaction.registry << message['channel_id']
+        channel = message['channel_id']
+        client = message['clientId']
+
+        # Tell registry that we have a new client (or lost a client) for that
+        # channel.
+        case message['channel']
+        when '/meta/connect'
+          Reaction.registry.add(channel, client)
+        when '/meta/disconnect'
+          Reaction.registry.remove(channel, client)
+        end
+
         callback.call(message)
+        # TODO: unit tests
 
+      end
+
+      private
+
+      def is_connection? message
+        ['/meta/connect', '/meta/disconnect'].include? message['channel'] and
+        'in-process' != message['connectionType']
       end
 
     end

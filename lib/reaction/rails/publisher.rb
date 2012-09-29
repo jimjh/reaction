@@ -13,10 +13,7 @@ module Reaction
     #
     # In addition, each session has a channel ID (if multiple tabs are open in
     # the same browser, then many clients share the same channel ID). This is
-    # kept on the client's cookie. Every few ms, clients send heartbeats on
-    # +/heartbeat+ to let the server know that it's stil alive. A registry of
-    # active channel IDs is held in memory, although it will later be moved to
-    # Redis.
+    # kept on the client's cookie.
     #
     # @example Publish an index of posts.
     #   class PostsController < ApplicationController
@@ -80,7 +77,7 @@ module Reaction
       # TODO: use an after filter?
       def broadcast(options)
 
-        options.each { |action, delta|
+        options.each do |action, delta|
           delta = Serializer.format_data delta.attributes,
             action: action,
             client_id: params[:client_id]
@@ -88,7 +85,7 @@ module Reaction
             channel = "/#{self.controller_name}/#{channel_id}"
             Reaction.bayeux.get_client.publish(channel, delta)
           }
-        }
+        end
 
       end
 

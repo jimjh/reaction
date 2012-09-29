@@ -10,8 +10,7 @@
 /*global _:true $:true amplify:true Faye:true*/
 
 // ## reaction-cache Module
-define(['./config', './identifier', './heartbeat',
-        './util', 'amplify', 'faye/client'],
+define(['./config', './identifier', './util', 'amplify', 'faye/client'],
        function(config, identifier) {
 
   'use strict';
