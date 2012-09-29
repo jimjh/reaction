@@ -16,7 +16,7 @@ describe 'Rails App' do
     mount_reaction at: '/r'
     get '/r/bayeux/client.js'
     last_response.should be_ok
-    content_type.should == 'text/javascript'
+    content_type.should match(%r{^text/javascript})
   end
 
   it 'should not allow reaction to be mounted twice' do
