@@ -13,6 +13,9 @@
 // Currently only supports Rails.
 //
 // See main.js for an example of how to include this in your app.
+//
+// ## Interface
+// * `Collection`: constructor for a reaction collection
 define(['reaction/config', 'reaction/cache', 'reaction/model', 'reaction/collection'],
        function(config, cache, model, collection){
 

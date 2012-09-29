@@ -69,11 +69,11 @@ module Reaction
       def broadcast(options)
 
         options.each { |action, delta|
-          delta = Serializer.format_data delta.attributes, action: action
-          Reaction.registry.each do |channel_id|
-            next if channel_id == cookies[:channel_id]
-            Reaction.bayeux.get_client.publish("/#{self.controller_name}/#{channel_id}", delta)
-          end
+          delta = Serializer.format_data delta.attributes,
+            action: action,
+            client_id: params[:client_id]
+          #} FIXME
+          Reaction.bayeux.get_client.publish("/#{self.controller_name}/**/*", delta)
         }
 
       end

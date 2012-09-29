@@ -61,6 +61,8 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
 
   // Makes an AJAX request using the given options.
   Cache.prototype._ajax = function(options) {
+    options.data = options.data || {};
+    options.data.client_id = config.id;
     _.defaults(options, {
       url: this.uri + '.reaction',
       dataType: 'json'
@@ -88,6 +90,7 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
     this.client = new Faye.Client(config.paths.bayeux);
     this.client.addExtension(identifier);
     var endpoint = _('/{0}/{1}').format(this.collection.controller_name, _.cookie('channel_id'));
+    _.log(endpoint);
     this.client.subscribe(endpoint, _.bind(this._onDelta, this));
   };
 
@@ -96,6 +99,10 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
 
     var delta = $.parseJSON(message);
     var that = this;
+
+    // Ignore invalid deltas or deltas from this client.
+    _.log(delta);
+    if (_.isEmpty(delta.client_id) || config.id == delta.client_id) return;
 
     switch (delta.action) {
       case 'create':
