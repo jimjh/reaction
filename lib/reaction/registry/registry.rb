@@ -8,6 +8,8 @@ module Reaction
   # TODO: move this to Redis
   class Registry
 
+    include Enumerable
+
     # Creates a new registry.
     def initialize
       @channels = {} # channel_id -> array of client ids
@@ -32,7 +34,7 @@ module Reaction
     def remove(channel, client)
       @lock.synchronize do
         next unless @channels.include? channel
-        @channels[channel].reject! { |c| c == client }
+        @channels[channel].delete(client)
         @channels.delete(channel) if @channels[channel].empty?
       end
     end
