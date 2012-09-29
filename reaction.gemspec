@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.homepage      = "http://github.com/jimjh/reaction"
   gem.license       = 'MIT'
 
-  gem.files         = %w(README.md LICENSE) + Dir.glob("lib/**/*")
+  gem.files         = %w(README.md LICENSE) + Dir.glob("lib/**/*") + Dir.glob("app/**/*")
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "reaction"
