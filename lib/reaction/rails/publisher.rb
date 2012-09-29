@@ -6,6 +6,18 @@ module Reaction
     # A request may specify this format by either:
     # - appending a +.reaction+ suffix to the resource URI, or
     # - sending an +Accept+ HTTP header that includes +application/vnd.reaction.v1+
+    #
+    # Every client has a UUID (pseudo-unique) client id that is attached to
+    # each request. Deltas are broadcast with this ID, so clients can disregard
+    # changes originating from themselves.
+    #
+    # In addition, each session has a channel ID (if multiple tabs are open in
+    # the same browser, then many clients share the same channel ID). This is
+    # kept on the client's cookie. Every few ms, clients send heartbeats on
+    # +/heartbeat+ to let the server know that it's stil alive. A registry of
+    # active channel IDs is held in memory, although it will later be moved to
+    # Redis.
+    #
     # @example Publish an index of posts.
     #   class PostsController < ApplicationController
     #     include Reaction::Rails::Publisher
@@ -72,8 +84,10 @@ module Reaction
           delta = Serializer.format_data delta.attributes,
             action: action,
             client_id: params[:client_id]
-          #} FIXME
-          Reaction.bayeux.get_client.publish("/#{self.controller_name}/**/*", delta)
+          Reaction.registry.each { |channel_id|
+            channel = "/#{self.controller_name}/#{channel_id}"
+            Reaction.bayeux.get_client.publish(channel, delta)
+          }
         }
 
       end

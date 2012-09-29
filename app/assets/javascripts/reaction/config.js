@@ -17,8 +17,10 @@ define(['./util'], function(){
   return {
     paths: {         // TODO: should be provided by rails
       root: '/',
+      heartbeat: '/reaction/heartbeat',
       bayeux: '/reaction/bayeux'
     },
-    id: _.uuid()
+    heartbeat_interval: 1000, // heartbeat interval in ms
+    id: _.uuid()             // unique uuid for this client
   };
 });

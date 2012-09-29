@@ -10,7 +10,8 @@
 /*global _:true $:true amplify:true Faye:true*/
 
 // ## reaction-cache Module
-define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'faye/client'],
+define(['./config', './identifier', './heartbeat',
+        './util', 'amplify', 'faye/client'],
        function(config, identifier) {
 
   'use strict';
@@ -90,7 +91,6 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
     this.client = new Faye.Client(config.paths.bayeux);
     this.client.addExtension(identifier);
     var endpoint = _('/{0}/{1}').format(this.collection.controller_name, _.cookie('channel_id'));
-    _.log(endpoint);
     this.client.subscribe(endpoint, _.bind(this._onDelta, this));
   };
 
@@ -101,7 +101,6 @@ define(['reaction/config', 'reaction/identifier', 'reaction/util', 'amplify', 'f
     var that = this;
 
     // Ignore invalid deltas or deltas from this client.
-    _.log(delta);
     if (_.isEmpty(delta.client_id) || config.id == delta.client_id) return;
 
     switch (delta.action) {
