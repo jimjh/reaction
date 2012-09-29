@@ -80,7 +80,7 @@ module Reaction
         options.each do |action, delta|
           delta = Serializer.format_data delta.attributes,
             action: action,
-            client_id: params[:client_id]
+            origin: params[:origin]
           Reaction.registry.each { |channel_id|
             channel = "/#{self.controller_name}/#{channel_id}"
             Reaction.bayeux.get_client.publish(channel, delta)

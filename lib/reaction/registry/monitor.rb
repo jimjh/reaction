@@ -4,8 +4,6 @@ module Reaction
   # XXX: BAD CODE.
   # * Channel ID is confusing, because we have faye channels, and then reaction's
   #   channel IDs.
-  # * Client ID is confusing. There is the client ID that the client uses to
-  #   check for origin of deltas, and then there is faye's client IDs.
   class Registry
 
     # Watches Faye for connect and disconnect.

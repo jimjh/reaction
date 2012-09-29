@@ -62,7 +62,7 @@ define(['./config', './identifier', './util', 'amplify', 'faye/client'],
   // Makes an AJAX request using the given options.
   Cache.prototype._ajax = function(options) {
     options.data = options.data || {};
-    options.data.client_id = config.id;
+    options.data.origin = config.id;
     _.defaults(options, {
       url: this.uri + '.reaction',
       dataType: 'json'
@@ -100,7 +100,7 @@ define(['./config', './identifier', './util', 'amplify', 'faye/client'],
     var that = this;
 
     // Ignore invalid deltas or deltas from this client.
-    if (_.isEmpty(delta.client_id) || config.id == delta.client_id) return;
+    if (_.isEmpty(delta.origin) || config.id == delta.origin) return;
 
     switch (delta.action) {
       case 'create':
