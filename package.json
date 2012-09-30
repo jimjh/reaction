@@ -3,7 +3,8 @@
   "version": "0.0.2",
   "dependencies" : {
     "mocha": ">= 1.5.0",
-    "should": ">= 1.2.0"
+    "should": ">= 1.2.0",
+    "request": ">= 2.11.4"
   },
   "scripts": {
     "test": "mocha"
