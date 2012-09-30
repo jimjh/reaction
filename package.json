@@ -1,0 +1,10 @@
+{
+  "name": "reaction",
+  "version": "0.0.2",
+  "dependencies" : {
+    "mocha": ">= 1.5.0"
+  },
+  "scripts": {
+    "test": "mocha --reporter Landing"
+  }
+}
