@@ -2,3 +2,4 @@
 --require should
 --require sinon
 --globals window
+--globals document

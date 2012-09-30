@@ -57,7 +57,7 @@ define(['underscore'], function(){
   //
   //      _.assert(0, 1); //>> throws error
   var assert = function(expected, actual) {
-    if (expected === actual) return;
+    if (_.isEqual(expected, actual)) return;
     _.fatal('Expected {0}, got {1}.', expected, actual);
   };
 
@@ -69,6 +69,7 @@ define(['underscore'], function(){
     return _.bind(func, this, args);
   };
 
+  // Helper method for `_.uuid()`.
   var S4 = function() {
     return (((1 + Math.random())*0x10000)|0).toString(16).substring(1);
   };
@@ -120,7 +121,7 @@ define(['underscore'], function(){
   var fatal = function() {
     var error = _.format.apply(this, arguments);
     _.warn(error);
-    throw {error: error};
+    throw new Error(error);
   };
 
   _.mixin({

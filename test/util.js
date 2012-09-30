@@ -15,11 +15,11 @@ requirejs(['reaction/util'], function() {
       });
 
       it('should log to console if it is defined', function() {
+        var stub = sinon.stub(console, 'log');
         window = {console: console};
-        sinon.spy(console, 'log');
-        _.log();
         _.log('yup it is working.', 'this should be on another line.');
-        console.log.called.should.eql(true);
+        stub.called.should.eql(true);
+        stub.restore();
       });
 
     });
@@ -33,11 +33,11 @@ requirejs(['reaction/util'], function() {
       });
 
       it('should warn to console if it is defined', function() {
+        var stub = sinon.stub(console, 'warn');
         window = {console: console};
-        sinon.spy(console, 'warn');
-        _.warn();
         _.warn('testing fire alarm - do not evacuate.');
-        console.warn.called.should.eql(true);
+        stub.called.should.eql(true);
+        stub.restore();
       });
 
     });
@@ -71,6 +71,71 @@ requirejs(['reaction/util'], function() {
 
     });
 
+    describe('#assert()', function() {
+
+      it('should throw an error if two values are not equal', function() {
+        var stub = sinon.stub(console, 'warn');
+        (function(){_.assert(0, 1);}).should.throw('Expected 0, got 1.');
+        (function(){_.assert('a', 'b');}).should.throw('Expected a, got b.');
+        (function(){_.assert([1,2], [3,4]);}).should.throw('Expected 1,2, got 3,4.');
+        (function(){_.assert({x:'y'}, {a:'b'});}).should.throw();
+        stub.restore();
+      });
+
+      it('should not throw an error if two values are equal', function() {
+        var stub = sinon.stub(console, 'warn');
+        (function(){_.assert(0, 0);}).should.not.throw();
+        (function(){_.assert('aab', 'aab');}).should.not.throw();
+        (function(){_.assert([1,2], [1,2]);}).should.not.throw();
+        (function(){_.assert({x:'y'}, {x:'y'});}).should.not.throw();
+        stub.restore();
+      });
+
+    });
+
+    describe('#uuid()', function() {
+
+      it('should generate unique UUIDs', function() {
+        var values = [];
+        for(var i = 0; i < 10; i++) {
+          var uuid = _.uuid();
+          values.should.not.includeEql(uuid);
+          values.push(uuid);
+        }
+      });
+
+    });
+
+    describe('#cookies()', function() {
+      it('should retrieve an associative array of cookies', function() {
+        document = {cookie: "   a=0;b=1    ;c=2;d=x====y   ;e=x%3D%3D%3D%3Dy"};
+        _.cookies().should.eql({
+          a: '0',
+          b: '1',
+          c: '2',
+          d: 'xy',
+          e: 'x%3D%3D%3D%3Dy'
+        });
+      });
+    });
+
+    describe('#cookie()', function() {
+      it('should retrieve values for each cookie', function() {
+        document = {cookie: "   a=0;b=1    ;c=2;d=x====y   ;e=x%3D%3D%3D%3Dy"};
+        _.cookie('a').should.eql('0');
+        _.cookie('b').should.eql('1');
+        _.cookie('c').should.eql('2');
+      });
+    });
+
+    describe('#fatal()', function() {
+      it('should log a warning and throw an error', function() {
+        var stub = sinon.stub(console, 'warn');
+        (function(){_.fatal('{0} is required', 'x');}).should.throw('x is required');
+        stub.called.should.eql(true);
+        stub.restore();
+      });
+    });
 
   });
 });
