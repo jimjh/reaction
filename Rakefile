@@ -6,14 +6,15 @@ require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new 'spec'
 
 desc 'runs all RSpec test examples'
-task :default => :spec
+task :default => [:spec, :test]
 
 # TODO: write a raketask to compile/optimize javascripts (exclude vendor
 # scripts)
 
-# TODO: write a raketask to build the gem
-
-# TODO: write a raketask to release the gem
+desc 'Executes the Javascript test cases'
+task :test do
+  sh 'npm test'
+end
 
 namespace :doc do
 
