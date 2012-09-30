@@ -125,6 +125,9 @@ requirejs(['reaction/util'], function() {
         _.cookie('a').should.eql('0');
         _.cookie('b').should.eql('1');
         _.cookie('c').should.eql('2');
+        _.cookie('d').should.eql('xy');
+        _.cookie('e').should.eql('x%3D%3D%3D%3Dy');
+        _.isUndefined(_.cookie('f')).should.eql(true);
       });
     });
 

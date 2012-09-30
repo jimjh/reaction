@@ -102,17 +102,12 @@ define(['underscore'], function(){
     return _cookies;
   };
 
-  // Finds the value for the specific cookie.
+  // Finds the value for the specific cookie. If cookie does not exist, returns
+  // `undefined`.
   //
   //      _.cookie('id'); //=> value of `id`
   var cookie = function(name) {
-     var cookie = null,
-         list = _.cookies();
-
-     _.each(list, function(value, key) {
-        if (key === name) cookie = value;
-     });
-     return cookie;
+     return _.cookies()[name];
   };
 
   // Logs the error message and throws an error.
