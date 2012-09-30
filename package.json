@@ -3,6 +3,7 @@
   "version": "0.0.2",
   "dependencies" : {
     "mocha": ">= 1.5.0",
+    "sinon": ">= 1.3",
     "sinon-mocha": "",
     "should": ">= 1.2.0",
     "requirejs": ">= 2.0.6"
