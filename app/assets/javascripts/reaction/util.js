@@ -24,6 +24,13 @@ define(['underscore'], function(){
     if(!no_logger) _.each(arguments, function(m){ console.log(m); });
   };
 
+  // Sprintf + Log.
+  //
+  //      _.logf("{0} and {1}", "hello", "bye") //>> hello and bye
+  var logf = function() {
+    _.log(_.format.apply(this, arguments));
+  };
+
   // Wrapper for `console.warn` that proxies to `_.log` if `console.warn` is
   // not defined.
   //
@@ -34,12 +41,22 @@ define(['underscore'], function(){
     else _.log.apply(this, arguments);
   };
 
-  // Sprintf + Log.
+  // Logs the error message and throws an error.
   //
-  //      _.logf("{0} and {1}", "hello", "bye") //>> hello and bye
-  var logf = function() {
-    _.log(_.format.apply(this, arguments));
+  //      _.fatal("x is required."); //>> warning and error
+  var fatal = function(error) {
+    _.warn(error);
+    throw new Error(error);
   };
+
+  // Logs the error message and throws an error.
+  //
+  //      _.fatalf("{0} is required.", "controller_name"); //>> warning and error
+  var fatalf = function() {
+    var error = _.format.apply(this, arguments);
+    _.fatal(error);
+  };
+
 
   // Super simple sprintf, adapted from an [answer][1] on SO.
   //
@@ -58,7 +75,7 @@ define(['underscore'], function(){
   //      _.assert(0, 1); //>> throws error
   var assert = function(expected, actual) {
     if (_.isEqual(expected, actual)) return;
-    _.fatal('Expected {0}, got {1}.', expected, actual);
+    _.fatalf('Expected {0}, got {1}.', expected, actual);
   };
 
   // Curry function (prefilling args.)
@@ -110,21 +127,13 @@ define(['underscore'], function(){
      return _.cookies()[name];
   };
 
-  // Logs the error message and throws an error.
-  //
-  //      _.fatal("{0} is required.", "controller_name"); //>> warning and error
-  var fatal = function() {
-    var error = _.format.apply(this, arguments);
-    _.warn(error);
-    throw new Error(error);
-  };
-
   _.mixin({
     log: log,
-    warn: warn,
     logf: logf,
-    format: format,
+    warn: warn,
     fatal: fatal,
+    fatalf: fatalf,
+    format: format,
     assert: assert,
     curry: curry,
     uuid: uuid,

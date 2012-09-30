@@ -134,7 +134,16 @@ requirejs(['reaction/util'], function() {
     describe('#fatal()', function() {
       it('should log a warning and throw an error', function() {
         var stub = sinon.stub(console, 'warn');
-        (function(){_.fatal('{0} is required', 'x');}).should.throw('x is required');
+        (function(){_.fatal('x is required');}).should.throw('x is required');
+        stub.called.should.eql(true);
+        stub.restore();
+      });
+    });
+
+    describe('#fatalf()', function() {
+      it('should log a warning and throw an error', function() {
+        var stub = sinon.stub(console, 'warn');
+        (function(){_.fatalf('{0} is required', 'x');}).should.throw('x is required');
         stub.called.should.eql(true);
         stub.restore();
       });
