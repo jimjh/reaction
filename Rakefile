@@ -13,7 +13,7 @@ task :default => [:spec, :test]
 
 desc 'Executes the Javascript test cases'
 task :test do
-  sh 'npm test'
+  sh 'npm install && npm test'
 end
 
 namespace :doc do
