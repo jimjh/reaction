@@ -29,6 +29,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'thin'
   gem.add_development_dependency 'sqlite3'
 
-  gem.add_dependency 'faye', '>= 0.8.3'
+  gem.add_dependency 'faye', '~> 0.8.4'
 
 end
