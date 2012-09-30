@@ -1,2 +1,4 @@
 --reporter Landing
 --require should
+--require requirejs
+--globals window
