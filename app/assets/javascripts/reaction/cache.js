@@ -89,7 +89,10 @@ define(['./config', './identifier', './util', 'amplify', 'faye/client'],
   Cache.prototype._subscribe = function() {
     this.client = new Faye.Client(config.paths.bayeux);
     this.client.addExtension(identifier);
-    var endpoint = _('/{0}/{1}').format(this.collection.controller_name, _.cookie('channel_id'));
+    var endpoint = _('/{0}/{1}').format(
+      this.collection.controller_name,
+      _.cookie(config.cookies.channelId)
+    );
     this.client.subscribe(endpoint, _.bind(this._onDelta, this));
   };
 

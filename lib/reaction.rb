@@ -1,5 +1,6 @@
 require 'set'
 require 'faye'
+require 'openssl'
 require 'reaction/version'
 
 module Reaction

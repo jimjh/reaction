@@ -11,9 +11,11 @@ module Reaction
     # each request. Deltas are broadcast with this ID, so clients can disregard
     # changes originating from themselves.
     #
-    # In addition, each session has a channel ID (if multiple tabs are open in
-    # the same browser, then many clients share the same channel ID). This is
-    # kept on the client's cookie.
+    # In addition, when the client first makes a request to a controller that
+    # includes Publisher, a channel ID and a signature is generated for the
+    # client. Together, they allow the client to access a private channel. Note
+    # that because these are stored in the cookie, multiple clients might share
+    # the same channel ID (e.g. same app in multiple tabs.)
     #
     # @example Publish an index of posts.
     #   class PostsController < ApplicationController
@@ -64,9 +66,28 @@ module Reaction
         request.format.reaction?
       end
 
-      # Ensures that the user's session has a generated channel id.
+      # Ensures that the user's cookie has a generated channel id and
+      # signature.
       def filter_before_reaction
-        cookies[:channel_id] = SecureRandom.uuid unless cookies.key? :channel_id
+
+        # Generates a new signature and stores it in the cookie/session.
+        def generate
+          cookies[:_r_channel_id], cookies[:_r_signature], session[:_r_secret] =
+            Registry::Signature.generate ::Rails.application.config.secret_token
+        end
+
+        unless cookies.key? :_r_channel_id and cookies.key? :_r_signature
+          generate
+        else
+          channel_id, signature, secret =
+            cookies[:_r_channel_id], cookies[:_r_signature], session[:_r_secret]
+          valid = Registry::Signature.validate signature,
+            channel_id: channel_id,
+            secret: secret,
+            salt: ::Rails.application.config.secret_token
+          generate unless valid
+        end
+
       end
 
       # Broadcasts the specified action to all subscribed clients.

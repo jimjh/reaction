@@ -9,15 +9,14 @@
 /*jshint strict:true unused:true*/
 /*global _:true*/
 
-define(['reaction/util'], function() {
+define(['./config', './util'], function(config) {
 
   'use strict';
 
-  var CHANNEL_ID = 'channel_id';
-
-  // Intercepts outgoing messages and adds a channel ID to it.
+  // Intercepts outgoing messages and adds a channel ID and signature to it.
   var outgoing = function(message, callback) {
-    message.channel_id = _.cookie(CHANNEL_ID);
+    message.channelId = _.cookie(config.cookies.channelId);
+    message.signature = _.cookie(config.cookies.signature);
     callback(message);
   };
 

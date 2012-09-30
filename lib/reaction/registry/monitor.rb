@@ -18,12 +18,12 @@ module Reaction
           return callback.call(message)
         end
 
-        unless message.include? 'channel_id' and message.include? 'clientId'
-          message['error'] = 'Invalid connection.'
+        unless message.include? 'channelId' and message.include? 'clientId'
+          message['error'] = Faye::Error.channel_forbidden
           return callback.call(message)
         end
 
-        channel = message['channel_id']
+        channel = message['channelId']
         client = message['clientId']
 
         # Tell registry that we have a new client (or lost a client) for that
@@ -36,7 +36,7 @@ module Reaction
         end
 
         callback.call(message)
-        # TODO: unit tests
+        # TODO: functional tests
 
       end
 
@@ -45,6 +45,7 @@ module Reaction
       def is_connection? message
         ['/meta/connect', '/meta/disconnect'].include? message['channel'] and
         'in-process' != message['connectionType']
+        # FIXME: this will change once we separate reaction and rails
       end
 
     end
