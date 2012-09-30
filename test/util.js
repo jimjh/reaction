@@ -1,19 +1,4 @@
-var requirejs = require('requirejs');
-
-//} XXX: OMG THIS IS SO FRAGILE
-requirejs.config({
-  baseUrl: __dirname + '/../app/assets/javascripts/',
-  paths: {
-    'underscore': __dirname + '/../vendor/assets/javascripts/underscore'
-  },
-  shim: {
-    'backbone': {
-      deps: ['underscore'],
-      exports: 'backbone'
-    }
-  },
-  nodeRequire: require
-});
+var requirejs = require('./test_helper');
 
 requirejs(['reaction/util'], function() {
 
