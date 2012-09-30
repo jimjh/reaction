@@ -7,7 +7,7 @@
  * ========================================================================
  */
 /*jshint strict:true unused:true*/
-/*global console:true _:true window:true document:true*/
+/*global console:true _:true window:true document:true unescape:true*/
 
 // ## reaction-util Module
 // Collection of utility functions that I like.
@@ -114,7 +114,7 @@ define(['underscore'], function(){
           value = null;
       var size = _.size(arr);
       if (size > 1) value = arr.slice(1).join('');
-      _cookies[key] = value;
+      _cookies[key] = unescape(value);
     });
     return _cookies;
   };

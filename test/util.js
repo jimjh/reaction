@@ -114,7 +114,7 @@ requirejs(['reaction/util'], function() {
           b: '1',
           c: '2',
           d: 'xy',
-          e: 'x%3D%3D%3D%3Dy'
+          e: 'x====y'
         });
       });
     });
@@ -126,7 +126,7 @@ requirejs(['reaction/util'], function() {
         _.cookie('b').should.eql('1');
         _.cookie('c').should.eql('2');
         _.cookie('d').should.eql('xy');
-        _.cookie('e').should.eql('x%3D%3D%3D%3Dy');
+        _.cookie('e').should.eql('x====y');
         _.isUndefined(_.cookie('f')).should.eql(true);
       });
     });
