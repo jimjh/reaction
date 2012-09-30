@@ -43,8 +43,8 @@ define(['underscore'], function(){
 
   // Super simple sprintf, adapted from an [answer][1] on SO.
   //
-  //      _.format("{0} and {1}", 'hello', 'good bye');
-  //      _('{0} and {1}').format('hello, 'bye');
+  //      _.format("{0} and {1}", 'hello', 'good bye'); //>> hello and good bye
+  //      _('{0} and {1}').format('hello, 'bye'); //>> hello and bye
   //
   //   [1]: http://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format
   var format = function(format) {
@@ -76,7 +76,7 @@ define(['underscore'], function(){
 
   // Generates pseudo-random string by concatenating random hexadecimal.
   //
-  //      _.uuid(); //>> random string
+  //      _.uuid(); //=> random string
   var uuid = function() {
     return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
   };
@@ -104,7 +104,7 @@ define(['underscore'], function(){
 
   // Finds the value for the specific cookie.
   //
-  //      _.cookie('id'); //=> returns value of `id`
+  //      _.cookie('id'); //=> value of `id`
   var cookie = function(name) {
      var cookie = null,
          list = _.cookies();
@@ -117,7 +117,7 @@ define(['underscore'], function(){
 
   // Logs the error message and throws an error.
   //
-  //      _.fatal("{0} is required.", "controller_name");
+  //      _.fatal("{0} is required.", "controller_name"); //>> warning and error
   var fatal = function() {
     var error = _.format.apply(this, arguments);
     _.warn(error);
