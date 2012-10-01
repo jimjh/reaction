@@ -22,32 +22,35 @@ describe 'Registry' do
     reg.add 0, 'abc'
     reg.add 0, 'def'
     reg.should include(0)
-    reg.remove 0, 'def'
+    reg.remove 'def'
     reg.should include(0)
-    reg.remove 0, 'abc'
+    reg.remove 'abc'
     reg.should_not include(0)
   end
 
   it 'should ignore bogus clients' do
     reg.add 0, 'abc'
     reg.should include(0)
-    reg.remove 0, 'def'
+    reg.remove 'def'
     reg.should include(0)
-    reg.remove 0, 'abc'
+    reg.remove 'abc'
+    reg.should_not include(0)
+    reg.remove 'abc'
     reg.should_not include(0)
   end
 
-  it 'should ignore bogus channels' do
+  it 'should ignore not allow clients to register multiple channels' do
     reg.add 0, 'abc'
+    reg.add 1, 'abc'
     reg.count.should be 1
-    reg.remove 1, 'abc'
-    reg.count.should be 1
+    reg.remove 'abc'
+    reg.count.should be 0
   end
 
   it 'should iterate through list of channels' do
 
     channels = [0, 1, 'blah']
-    channels.each { |channel| reg.add channel, 'abc' }
+    channels.each { |channel| reg.add channel, channel }
 
     reg.each do |channel|
       channels.should include(channel)

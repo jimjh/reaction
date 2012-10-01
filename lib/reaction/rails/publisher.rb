@@ -81,11 +81,11 @@ module Reaction
         else
           channel_id, signature, secret =
             cookies[:_r_channel_id], cookies[:_r_signature], session[:_r_secret]
-          valid = Registry::Signature.validate signature,
-            channel_id: channel_id,
-            secret: secret,
-            salt: ::Rails.application.config.secret_token
-          generate unless valid
+          # valid = Registry::Signature.validate signature,
+          #  channel_id: channel_id,
+          #  secret: secret,
+          #  salt: ::Rails.application.config.secret_token
+          # generate unless valid
         end
 
       end
@@ -103,6 +103,7 @@ module Reaction
             action: action,
             origin: params[:origin]
           Reaction.registry.each { |channel_id|
+            ::Rails.logger.debug "Sending delta to #{channel_id}"
             channel = "/#{self.controller_name}/#{channel_id}"
             Reaction.bayeux.get_client.publish(channel, delta)
           }

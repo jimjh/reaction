@@ -29,6 +29,9 @@ module ActionDispatch::Routing
       Reaction.registry = Reaction::Registry.new
       Reaction.bayeux = Reaction::Adapters::RackAdapter.new(opts)
 
+      monitor = Reaction::Registry::Monitor.new Reaction.bayeux
+      Reaction.bayeux.add_extension monitor
+
       mount Reaction.bayeux, at: path
 
     end
@@ -41,8 +44,7 @@ module ActionDispatch::Routing
     def defaultize(opts)
       defaults = {
         at: '/reaction',
-        server: 'thin',
-        extensions: [Reaction::Registry::Monitor.new]
+        server: 'thin'
       }
       opts = defaults.merge opts
       opts.delete :mount

@@ -94,6 +94,7 @@ define(['./config', './identifier', './util', 'amplify', 'faye/client'],
       _.cookie(config.cookies.channelId)
     );
     this.client.subscribe(endpoint, _.bind(this._onDelta, this));
+    //} FIXME: in Safari, cookie might not be available if browser is just started.
   };
 
   // Responds to changes on server and propagates them to the client.

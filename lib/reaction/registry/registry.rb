@@ -2,8 +2,9 @@ module Reaction
 
   # Registry.
   # Maintains a register of active channels. Internally, it keeps a hash that
-  # maps channel IDs to a set of client IDs. When the last client is
-  # disconnected, the channel is deleted.
+  # maps client IDs to channel IDs and their respective counters. When a new
+  # client is added, the counter is incremented; when a client is removed, the
+  # counter is decremented. When the counter hits zero, the channel is removed.
   # --
   # TODO: move this to Redis
   class Registry
@@ -12,7 +13,8 @@ module Reaction
 
     # Creates a new registry.
     def initialize
-      @channels = {} # channel_id -> array of client ids
+      @clients = {} # client_id -> channel_id
+      @channels = {} # channel_id -> counter
       @lock = Mutex.new
     end
 
@@ -22,20 +24,23 @@ module Reaction
     # @param [String] client ID
     def add(channel, client)
       @lock.synchronize do
-        @channels[channel] ||= Set.new
-        @channels[channel] << client
+        next if @clients.key? client
+        ::Rails.logger.debug "Adding #{client} to #{channel}."
+        @clients[client] = channel
+        @channels[channel] = @channels[channel] ? @channels[channel] + 1 : 1
       end
     end
 
     # Unregisters the given client from a channel. If it is the last client,
     # removes the channel.
-    # @param [String] channel ID
     # @param [String] client ID
-    def remove(channel, client)
+    def remove(client)
       @lock.synchronize do
-        next unless @channels.include? channel
-        @channels[channel].delete(client)
-        @channels.delete(channel) if @channels[channel].empty?
+        next unless @clients.include? client
+        channel = @clients.delete(client)
+        ::Rails.logger.debug "Removing #{client} from #{channel}."
+        @channels[channel] -= 1
+        @channels.delete(channel) if @channels[channel].zero?
       end
     end
 
