@@ -2,20 +2,51 @@ module Reaction
 
   module Rails
 
+    # Publisher handles responses that use the +:reaction+ format.
     # The +:reaction+ mime type is defined as +application/vnd.reaction.v1+.
     # A request may specify this format by either:
     # - appending a +.reaction+ suffix to the resource URI, or
     # - sending an +Accept+ HTTP header that includes +application/vnd.reaction.v1+
     #
-    # Every client has a UUID (pseudo-unique) client id that is attached to
-    # each request. Deltas are broadcast with this ID, so clients can disregard
-    # changes originating from themselves.
+    # == Origin
+    # Every client has a pseudo-unique origin id that is attached to each XHR
+    # request. Deltas broadcast by Publisher carry this ID with them, so
+    # clients can disregard changes originating from themselves. For more
+    # details, refer to the +reaction-identifier+ module in the javascript
+    # library.
     #
-    # In addition, when the client first makes a request to a controller that
-    # includes Publisher, a channel ID and a signature is generated for the
-    # client. Together, they allow the client to access a private channel. Note
-    # that because these are stored in the cookie, multiple clients might share
-    # the same channel ID (e.g. same app in multiple tabs.)
+    # == Authentication
+    # When the client makes a +#fetch()+ call to the controller to retrieve an
+    # index of records, Publisher checks the session for a few things:
+    # - If the session contains a +channel_id+, a new access token is generated
+    #   for this channel and sent along with the response.
+    # - Otherwise, a new +channel_id+ and access token pair is generated and
+    #   sent along with the response.
+    #
+    # The client should use the access token to subscribe to the private
+    # channel and listen for updates. Note that because the +channel_id+ is
+    # stored in the session, it's reset when the session is invalidated,
+    # preventing channel fixation attacks.
+    #
+    # === Generating Channel IDs
+    # Publisher will try to get a channel ID in the following order:
+    # 1. If the controller responds to +:reaction_channel+ method, then it
+    #    is invoked to generate an ID.
+    # 1. If the controller responds to +:current_user+ and the returned object
+    #    responds to +:id+, then the user's ID is used as the channel ID.
+    # 1. If all else fails, then a unique ID is generated via +SecureRandom#uuid+.
+    #
+    # === Generating Access Tokens
+    # The Rails salt is used to generate a secret token.
+    #     SHA256(channel_id + date + user-agent + csrf + salt)
+    #
+    # A 'Date' header will be added to the response. The client should include
+    # this in the subscription request.
+    #
+    # === Validating Access Tokens
+    # When Faye receives a connection request, the access token provided by the
+    # client will be validated using:
+    #     SHA256(channel_id + date + user_agent + csrf + salt)
     #
     # @example Publish an index of posts.
     #   class PostsController < ApplicationController
@@ -43,12 +74,22 @@ module Reaction
     #   end
     module Publisher
 
+      # HTTP Header for channel ID
+      CHANNEL_HEADER = 'X-Reaction-Channel'
+
+      # HTTP Header for access token
+      TOKEN_HEADER = 'X-Reaction-Token'
+
+      # HTTP Header for date
+      DATE_HEADER = 'Date'
+
       # Callback invoked when Publisher is included in a controller. Registers
-      # response mime type for +:reaction+.
+      # response mime type for +:reaction+, and adds +:ensure_channel+ as a
+      # before_filter for +:index+.
       # @return [void]
       def self.included(base)
         base.respond_to :reaction
-        base.before_filter :filter_before_reaction
+        base.before_filter :ensure_channel, only: [:index]
       end
 
       # Renders given resource in the reaction format.
@@ -66,27 +107,25 @@ module Reaction
         request.format.reaction?
       end
 
-      # Ensures that the user's cookie has a generated channel id and
-      # signature.
-      def filter_before_reaction
+      # Ensures that the user's session has a channel ID. If a channel ID is
+      # found, generates a new token; otherwise, generates a new channel ID and
+      # token pair.
+      # @return [void]
+      def ensure_channel
 
-        # Generates a new signature and stores it in the cookie/session.
-        def generate
-          cookies[:_r_channel_id], cookies[:_r_signature], session[:_r_secret] =
-            Registry::Signature.generate ::Rails.application.config.secret_token
-        end
+        session[:_r_channel] ||= Helpers.generate_channel(self)
+        date = Time.now.to_i.to_s
+        token = Registry::Auth.generate_token \
+          channel_id: session[:_r_channel],
+          date: date,
+          user_agent: request.env['HTTP_USER_AGENT'] || '',
+          csrf: request.env['HTTP_X_CSRF_TOKEN'] || '',
+          salt: ::Rails.application.config.secret_token
 
-        unless cookies.key? :_r_channel_id and cookies.key? :_r_signature
-          generate
-        else
-          channel_id, signature, secret =
-            cookies[:_r_channel_id], cookies[:_r_signature], session[:_r_secret]
-          # valid = Registry::Signature.validate signature,
-          #  channel_id: channel_id,
-          #  secret: secret,
-          #  salt: ::Rails.application.config.secret_token
-          # generate unless valid
-        end
+        response.headers.merge! \
+          CHANNEL_HEADER => session[:_r_channel],
+          TOKEN_HEADER => token,
+          DATE_HEADER => date
 
       end
 
@@ -94,8 +133,8 @@ module Reaction
       # @example
       #   broadcast create: @post
       # TODO: smarter broadcast w. auto detect
-      # TODO: authorization
       # TODO: use an after filter?
+      # @return [void]
       def broadcast(options)
 
         options.each do |action, delta|
@@ -107,6 +146,28 @@ module Reaction
             channel = "/#{self.controller_name}/#{channel_id}"
             Reaction.bayeux.get_client.publish(channel, delta)
           }
+        end
+
+      end
+
+      # Helper methods for Publisher that should not be exposed to the
+      # including controller.
+      module Helpers
+
+        class << self
+
+          # Generates a channel id. Refer to {Reaction::Rails::Publisher} for
+          # the algorithm.
+          # @param [Rails::ActionController] ctrl   the controller that includes
+          #                                         Publisher
+          # @return [String] channel ID
+          def generate_channel(ctrl)
+            return ctrl.reaction_channel if ctrl.respond_to? :reaction_channel
+            return ctrl.current_user.id if ctrl.respond_to?(:current_user) &&
+              ctrl.current_user.respond_to?(:id)
+            return SecureRandom.uuid
+          end
+
         end
 
       end

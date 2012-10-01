@@ -1,13 +1,16 @@
 module Reaction
 
-  # Reaction-Rails
+  # Reaction-Rails adapter that contains a suite of tools for using Reaction
+  # with Rails.
   module Rails
 
     # Struct containing some convenience paths for Rails module.
-    # @attr_reader [String] path to +lib/reaction/rails+
+    # @attr [String] root   path to +lib/reaction/rails+
     Paths = Struct.new(:root)
     @paths = Paths.new
     @paths.root = File.join(Reaction.paths.root, 'reaction', 'rails')
+
+    @paths.freeze
 
     class << self
       # @!attribute [r] paths

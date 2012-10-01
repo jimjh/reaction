@@ -29,7 +29,9 @@ module ActionDispatch::Routing
       Reaction.registry = Reaction::Registry.new
       Reaction.bayeux = Reaction::Adapters::RackAdapter.new(opts)
 
-      monitor = Reaction::Registry::Monitor.new Reaction.bayeux
+      monitor = Reaction::Registry::Monitor.new \
+        Reaction.bayeux,
+        Rails.application.config.secret_token
       Reaction.bayeux.add_extension monitor
 
       mount Reaction.bayeux, at: path

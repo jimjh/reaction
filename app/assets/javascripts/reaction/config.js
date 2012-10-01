@@ -19,10 +19,6 @@ define(['./util'], function(){
       root: '/',
       bayeux: '/reaction/bayeux'
     },
-    cookies: {
-      channelId: '_r_channel_id',
-      signature: '_r_signature'
-    },
     id: _.uuid()             // unique uuid for this client
   };
 });

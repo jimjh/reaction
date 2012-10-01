@@ -17,4 +17,11 @@ shared_context 'rails app' do
     end
   end
 
+  class DefaultController < ApplicationController
+    include Reaction::Rails::Publisher
+    def index
+      respond_with @data
+    end
+  end
+
 end

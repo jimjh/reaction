@@ -18,13 +18,13 @@ module Reaction
       @lock = Mutex.new
     end
 
-    # Registers a new client for that channel. No op if client is already
-    # registered.
+    # Registers a new client for that channel. Migrates client to new channel
+    # if client already exists.
     # @param [String] channel ID
     # @param [String] client ID
     def add(channel, client)
       @lock.synchronize do
-        next if @clients.key? client
+        _remove(client) if @clients.include? client and @clients[client] != channel
         ::Rails.logger.debug "Adding #{client} to #{channel}."
         @clients[client] = channel
         @channels[channel] = @channels[channel] ? @channels[channel] + 1 : 1
@@ -36,17 +36,26 @@ module Reaction
     # @param [String] client ID
     def remove(client)
       @lock.synchronize do
-        next unless @clients.include? client
-        channel = @clients.delete(client)
-        ::Rails.logger.debug "Removing #{client} from #{channel}."
-        @channels[channel] -= 1
-        @channels.delete(channel) if @channels[channel].zero?
+        _remove(client)
       end
     end
 
     # Iterates through an array of channel IDs.
     def each(&block)
       return @channels.keys.each(&block)
+    end
+
+    private
+
+    # Removes client from +@clients+, and decrements channel's client count. If
+    # channel has no clients, it is removed.
+    # @param [String] client ID
+    def _remove(client)
+      return unless @clients.include? client
+      channel = @clients.delete(client)
+      ::Rails.logger.debug "Removing #{client} from #{channel}."
+      @channels[channel] -= 1
+      @channels.delete(channel) if @channels[channel].zero?
     end
 
   end

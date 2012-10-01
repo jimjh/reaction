@@ -1,5 +1,5 @@
 /* ========================================================================
- * identifier.js v0.0.1
+ * names.js v0.0.2
  * http://github.com/jimjh/reaction
  * ========================================================================
  * Copyright (c) 2012 Carnegie Mellon University
@@ -7,19 +7,19 @@
  * ========================================================================
  */
 /*jshint strict:true unused:true*/
-/*global _:true*/
 
-define(['./config', './util'], function(config) {
+// ## reaction-names Module
+// Object containing string constants.
+define(function() {
 
   'use strict';
 
-  // Intercepts outgoing messages and adds a channel ID and signature to it.
-  var outgoing = function(message, callback) {
-    message.channelId = _.cookie(config.cookies.channelId);
-    message.signature = _.cookie(config.cookies.signature);
-    callback(message);
+  return {
+    headers: {
+      channel: 'X-Reaction-Channel',
+      token: 'X-Reaction-Token',
+      date: 'Date'
+    }
   };
-
-  return { outgoing: outgoing };
 
 });

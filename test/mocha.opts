@@ -3,3 +3,5 @@
 --require sinon
 --globals window
 --globals document
+--globals navigator
+--globals $

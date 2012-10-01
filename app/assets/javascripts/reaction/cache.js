@@ -10,8 +10,8 @@
 /*global _:true $:true amplify:true Faye:true*/
 
 // ## reaction-cache Module
-define(['./config', './identifier', './util', 'amplify', 'faye/client'],
-       function(config, identifier) {
+define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
+       function(config, names, auth) {
 
   'use strict';
 
@@ -55,7 +55,6 @@ define(['./config', './identifier', './util', 'amplify', 'faye/client'],
     this.collection = collection;
     this.uri = _('{0}{1}').format(config.paths.root, collection.controller_name);
     this.key = key(collection.controller_name);
-    this._subscribe();
 
   };
 
@@ -82,19 +81,20 @@ define(['./config', './identifier', './util', 'amplify', 'faye/client'],
   Cache.prototype._onFetch = function(model, success, resp, status, xhr) {
     _.assert(SCHEMA.data, resp.type);
     this._storeList(resp.items);
+    this._subscribe(xhr);
     success(resp.items, status, xhr);
   };
 
   // Subscribe to Faye channel for changes. Uses one channel for each client.
-  Cache.prototype._subscribe = function() {
+  Cache.prototype._subscribe = function(xhr) {
+    var channel = xhr.getResponseHeader(names.headers.channel);
     this.client = new Faye.Client(config.paths.bayeux);
-    this.client.addExtension(identifier);
-    var endpoint = _('/{0}/{1}').format(
-      this.collection.controller_name,
-      _.cookie(config.cookies.channelId)
-    );
+    this.client.addExtension(auth({
+      token: xhr.getResponseHeader(names.headers.token),
+      date: xhr.getResponseHeader(names.headers.date)
+    }));
+    var endpoint = _('/{0}/{1}').format(this.collection.controller_name, channel);
     this.client.subscribe(endpoint, _.bind(this._onDelta, this));
-    //} FIXME: in Safari, cookie might not be available if browser is just started.
   };
 
   // Responds to changes on server and propagates them to the client.

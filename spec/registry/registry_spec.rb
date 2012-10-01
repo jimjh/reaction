@@ -39,10 +39,11 @@ describe 'Registry' do
     reg.should_not include(0)
   end
 
-  it 'should ignore not allow clients to register multiple channels' do
+  it 'should allow clients to migrate channels' do
     reg.add 0, 'abc'
     reg.add 1, 'abc'
     reg.count.should be 1
+    reg.first.should be 1
     reg.remove 'abc'
     reg.count.should be 0
   end
