@@ -1,5 +1,8 @@
 # Reaction
 
+[![Build Status](https://secure.travis-ci.org/jimjh/reaction.png)](http://travis-ci.org/jimjh/reaction)
+[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/jimjh/reaction)
+
 This gem combines [Backbone][backbone]'s MVC and [Faye][faye]'s push
 capabilities to make data synchronization between the client's local storage
 and the server's database easy and almost transparent.  Refer to
