@@ -85,11 +85,11 @@ module Reaction
 
       # Callback invoked when Publisher is included in a controller. Registers
       # response mime type for +:reaction+, and adds +:ensure_channel+ as a
-      # before_filter for +:index+.
+      # after_filter for +:index+.
       # @return [void]
       def self.included(base)
         base.respond_to :reaction
-        base.before_filter :ensure_channel, only: [:index]
+        base.after_filter :ensure_channel, only: [:index]
       end
 
       # Renders given resource in the reaction format.
