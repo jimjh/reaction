@@ -142,7 +142,7 @@ module Reaction
             action: action,
             origin: params[:origin]
           Reaction.registry.each { |channel_id|
-            ::Rails.logger.debug "Sending delta to #{channel_id}"
+            ::Reaction.logger.debug "Sending delta to #{channel_id}"
             channel = "/#{self.controller_name}/#{channel_id}"
             Reaction.bayeux.get_client.publish(channel, delta)
           }

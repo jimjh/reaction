@@ -1,5 +1,6 @@
 module Reaction
 
+
   # Registry.
   # Maintains a register of active channels. Internally, it keeps a hash that
   # maps client IDs to channel IDs and their respective counters. When a new
@@ -10,6 +11,7 @@ module Reaction
   class Registry
 
     include Enumerable
+    include Mixins::Logging
 
     # Creates a new registry.
     def initialize
@@ -25,7 +27,7 @@ module Reaction
     def add(channel, client)
       @lock.synchronize do
         _remove(client) if @clients.include? client and @clients[client] != channel
-        ::Rails.logger.debug "Adding #{client} to #{channel}."
+        debug { "Adding #{client} to #{channel}." }
         @clients[client] = channel
         @channels[channel] = @channels[channel] ? @channels[channel] + 1 : 1
       end
@@ -53,7 +55,7 @@ module Reaction
     def _remove(client)
       return unless @clients.include? client
       channel = @clients.delete(client)
-      ::Rails.logger.debug "Removing #{client} from #{channel}."
+      debug { "Removing #{client} from #{channel}." }
       @channels[channel] -= 1
       @channels.delete(channel) if @channels[channel].zero?
     end

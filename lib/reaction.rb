@@ -5,14 +5,9 @@ require 'reaction/version'
 
 module Reaction
 
-  # Struct containing some convenience paths for Reaction gem.
-  Paths = Struct.new(:root)
-  @paths = Paths.new
-  @paths.root = File.dirname(__FILE__)
-
   class << self
 
-    # only one bayeux server per process for now
+    # Only one bayeux server per process for now
     attr_accessor :bayeux
 
     # @!attribute [rw] registry
@@ -22,6 +17,10 @@ module Reaction
     # @!attribute [r] paths
     #   @return [Paths] struct containing some convenience paths.
     attr_reader :paths
+
+    # @!attribute [r] logger
+    #   @return [Logger] logger
+    attr_reader :logger
 
     # Loads package files.
     # Usage:
@@ -39,11 +38,25 @@ module Reaction
       const_defined? :Rails and Rails.const_defined? :ActionDispatch
     end
 
+    # Initializes and returns a new paths struct.
+    # @return [Struct] struct containing paths.
+    def initialize_paths
+      paths = Struct.new(:root).new
+      paths.root = File.dirname(__FILE__)
+      paths
+    end
+
   end
+
+  require_package :mixins
+
+  @paths = initialize_paths
+  @logger = Mixins::Logging.new_logger
 
   require_package :adapters
   require_package :deps
   require_package :registry
   require_package :rails if in_rails?
+
 
 end
