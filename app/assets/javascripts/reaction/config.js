@@ -1,9 +1,9 @@
 /* ========================================================================
- * config.js v0.0.1.1
+ * config.js
  * http://github.com/jimjh/reaction
  * ========================================================================
  * Copyright (c) 2012 Carnegie Mellon University
- * License: https://github.com/jimjh/reaction/blob/master/LICENSE
+ * License: https://raw.github.com/jimjh/reaction/master/LICENSE
  * ========================================================================
  */
 /*jshint strict:true unused:true*/
