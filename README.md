@@ -41,7 +41,7 @@ To use the development copy of the gem, add the following line in your applicati
     gem 'reaction', :path => '/path/to/gem'
 
 * Use [Pry][pry] and [RSpec][rspec] for debugging and testing Ruby code (see [spec][spec])
-* Use [RequireJS][require], [Mocha][mocha], [Sinon][sinon] for developing and testing Javascript code (see [test][test])
+* Use [RequireJS][require], [Mocha][mocha], [Sinon.JS][sinon], and [Should.JS][should] for developing and testing Javascript code (see [test][test])
 
 
   [todos]: https://github.com/jimjh/reaction-todos
@@ -56,3 +56,4 @@ To use the development copy of the gem, add the following line in your applicati
   [sinon]: http://sinonjs.org/
   [spec]: https://github.com/jimjh/reaction/tree/master/spec
   [test]: https://github.com/jimjh/reaction/tree/master/test
+  [should]: https://github.com/visionmedia/should.js
