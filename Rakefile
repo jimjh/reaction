@@ -2,6 +2,7 @@
 require 'bundler'
 require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
+require 'yard'
 
 RSpec::Core::RakeTask.new 'spec'
 
@@ -23,10 +24,12 @@ namespace :doc do
     sh 'groc'
   end
 
-  desc 'Generate documentation for ruby scripts'
-  task :rb do
-    sh 'yard doc --output-dir rb-doc'
+  YARD::Rake::YardocTask.new do |t|
+    t.options = ['--output-dir', 'rb-doc']
   end
+
+  desc 'Generate documentation for ruby scripts'
+  task :rb => [:yard]
 
   desc 'Generate documentation for ruby and javascript'
   task :all => [:js, :rb]
