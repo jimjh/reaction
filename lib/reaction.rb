@@ -55,7 +55,6 @@ module Reaction
   @logger = Mixins::Logging.new_logger
 
   require_package :adapters
-  require_package :deps
   require_package :registry
   require_package :rails if in_rails?
 
