@@ -14,7 +14,7 @@ task :default => [:spec, :test]
 
 desc 'Executes the Javascript test cases'
 task :test do
-  sh 'mocha'
+  sh 'mocha', 'test'
 end
 
 namespace :doc do
