@@ -7,8 +7,5 @@
     "sinon-mocha": "",
     "should": ">= 1.2.0",
     "requirejs": ">= 2.0.6"
-  },
-  "scripts": {
-    "test": "mocha"
   }
 }
