@@ -17,16 +17,22 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Reaction::VERSION
 
-  gem.add_development_dependency 'rspec', '>= 2.11.0'
-  gem.add_development_dependency 'rake'
+  # Test Stuff
+  gem.add_development_dependency 'rspec', '~> 2.11'
+  gem.add_development_dependency 'rake', '~> 0.9'
   gem.add_development_dependency 'rack-test'
   gem.add_development_dependency 'debugger-pry'
+  gem.add_development_dependency 'capybara', '~> 1.0'
+  gem.add_development_dependency 'poltergeist', '~> 1.0'
+
+  # Documentation Stuff
   gem.add_development_dependency 'yard'
   gem.add_development_dependency 'redcarpet'
 
+  # Rails Stuff
   gem.add_development_dependency 'rails', '>= 3.2.8'
   gem.add_development_dependency 'rspec-rails'
-  gem.add_development_dependency 'thin'
+  gem.add_development_dependency 'thin', '~> 1.4'
   gem.add_development_dependency 'sqlite3'
 
   gem.add_dependency 'faye', '~> 0.8.4'
