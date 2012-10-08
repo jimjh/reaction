@@ -45,7 +45,8 @@ namespace :ci do
       'version=phantomjs-1.7.0-linux-i686;
        wget http://phantomjs.googlecode.com/files/$version.tar.bz2;
        tar xjf $version.tar.bz2;
-       mv $version phantomjs'
+       mv $version phantomjs;
+       exit'
     script
   end
 
