@@ -7,7 +7,7 @@ require 'yard'
 RSpec::Core::RakeTask.new 'spec'
 
 desc 'runs all RSpec test examples'
-task :default => [:spec, :test]
+task :default => [:test, :spec]
 
 # TODO: write a raketask to compile/optimize javascripts (exclude vendor
 # scripts)
