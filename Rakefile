@@ -32,3 +32,17 @@ namespace :doc do
   task :all => [:js, :rb]
 
 end
+
+namespace :ci do
+
+  desc 'Install PhantomJS'
+  task :install_phantomjs do
+    sh <<-script
+      version=phantomjs-1.7.0-linux-i686;
+      wget http://phantomjs.googlecode.com/files/$version.tar.bz2
+      tar xjf $version.tar.bz2
+      mv $version phantomjs
+    script
+  end
+
+end
