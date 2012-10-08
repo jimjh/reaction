@@ -2,7 +2,7 @@ before_script:
   # adapted from
   # https://raw.github.com/jonleighton/poltergeist/9420341ae98bdf8e442a3783a98d7b61014cd097/.travis.yml
   - sudo su -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf; echo "nameserver 8.8.4.4" >> /etc/resolv.conf'
-  - sudo rake 'ci:install_phantomjs'
+  - rake 'ci:install_phantomjs'
   - "export PATH=phantomjs/bin:$PATH"
   - phantomjs --version
 install: 'bundle install && npm install'
