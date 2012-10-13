@@ -17,6 +17,7 @@ define(function() {
   return {
     headers: {
       channel: 'X-Reaction-Channel',
+      request: 'X-Reaction-Request',
       token: 'X-Reaction-Token',
       date: 'Date'
     }

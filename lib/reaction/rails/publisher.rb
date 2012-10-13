@@ -83,13 +83,16 @@ module Reaction
       # HTTP Header for date
       DATE_HEADER = 'Date'
 
+      # HTTP request header for reaction request type.
+      X_REQUEST = 'HTTP_X_REACTION_REQUEST'
+
       # Callback invoked when Publisher is included in a controller. Registers
       # response mime type for +:reaction+, and adds +:ensure_channel+ as a
-      # after_filter for +:index+.
+      # before_filter for +:index+.
       # @return [void]
       def self.included(base)
         base.respond_to :reaction
-        base.after_filter :ensure_channel, only: [:index]
+        base.before_filter :ensure_channel, only: [:index]
       end
 
       # Renders given resource in the reaction format.
@@ -107,9 +110,17 @@ module Reaction
         request.format.reaction?
       end
 
+      # @return [Boolean] true iff reaction request type is 'sync'
+      def reaction_sync?
+        'sync' == env[X_REQUEST]
+      end
+
       # Ensures that the user's session has a channel ID. If a channel ID is
       # found, generates a new token; otherwise, generates a new channel ID and
       # token pair.
+      #
+      # If the parameter +id_only+ is present, renders immediately and avoids
+      # controller action.
       # @return [void]
       def ensure_channel
 
@@ -126,6 +137,9 @@ module Reaction
           CHANNEL_HEADER => session[:_r_channel],
           TOKEN_HEADER => token,
           DATE_HEADER => date
+
+        # halt immediately if it's a channel request
+        react_with([]) if 'channel' == env[X_REQUEST]
 
       end
 

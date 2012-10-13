@@ -4,11 +4,11 @@ describe 'Serializer' do
 
   context 'given some arbitrary models' do
 
-    Person = Struct.new :name
+    Person = Struct.new :name, :updated_at
 
     before :each do
       @names = ['Adrian', 'Audrey', 'Jerene', 'X', 'Inez', 'John']
-      @people = @names.map { |name| Person.new name }
+      @people = @names.map { |name| Person.new name, Time.now }
     end
 
     it 'should format array as data' do
@@ -40,7 +40,8 @@ describe 'Serializer' do
     end
 
     it 'should handle null objects' do
-      'null'.should eql(Reaction::Rails::Serializer.format_data nil)
+      expected = {type: 'datum', item: nil}.to_json
+      Reaction::Rails::Serializer.format_data(nil).should eql(expected)
     end
 
     it 'should accept custom fields' do
@@ -66,6 +67,28 @@ describe 'Serializer' do
       json = Reaction::Rails::Serializer.format_data @person
       hash = JSON.parse json
       hash['errors'].should eql @person.errors
+
+    end
+
+    it 'should handle frozen objects' do
+
+      @person = Person.new 'batman'
+      @person.freeze
+
+      json = Reaction::Rails::Serializer.format_data @person
+      hash = JSON.parse json
+      hash['item']['name'].should eql @person.name
+
+    end
+
+    it 'should convert updated_at to float' do
+
+      @person = Person.new 'batman', Time.now
+
+      json = Reaction::Rails::Serializer.format_data @person
+      hash = JSON.parse json
+
+      hash['item']['updated_at'].should eql @person.updated_at
 
     end
 

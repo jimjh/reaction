@@ -21,7 +21,8 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
   // Schemas - predefined formats of server responses.
   var SCHEMA = {
     data: 'data',
-    datum: 'datum'
+    datum: 'datum',
+    sync: 'sync'
   };
 
   // Text status from jqXHR that warrant a retry.
@@ -35,7 +36,7 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
   // Used as a XHR error callback to force retry.
   //
   //      $.ajax({error: retry});
-  var retry = function(xhr, textStatus){
+  var retry = function(xhr, textStatus) {
     this.tryCount = this.tryCount || 0;
     this.tryCount++;
     if (_.include(RETRY_STATUSES, textStatus) && this.tryCount <= 3) {
@@ -69,23 +70,59 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
     $.ajax(options);
   };
 
-  // Fetches the default set of items from the server.
-  //} TODO: Check etags, cache control etc. Don't need to fetch all the time.
+  // Fetches entries from the cache, and makes an asynchronous request to the
+  // server for updates.
+  //
+  // 1. Return whatever is in the cache
+  // 1. AJAX call to Controller#index to get channel ID
+  // 1. Subscribe to channel
+  // 1. AJAX call to Controller#index to get changes since last sync
+  //
+  // The trick is to subscribe before we sync, which ensures that every delta
+  // is received at least once (if we did it the other way, deltas could come
+  // in between sync and subscribe.)
   Cache.prototype.fetch = function(model, options) {
-    options.success =  _.bind(this._onFetch, this, model, options.success);
+
+    //} return whatever is in cache
+    options.success(_.values(this._readDict()), 'success');
+
+    //} get channel ID
+    options.success =  _.bind(this._onFetch, this, options);
+    options.headers = options.headers || {};
+    options.headers[names.headers.request] = 'channel';
+
+    //} TODO: error handling and retry
     this._ajax(options);
+
   };
 
-  // Validates the format of the received data and saves it in HTML5 local
-  // storage. Invoked when #_fetch() succeeds.
-  Cache.prototype._onFetch = function(model, success, resp, status, xhr) {
-    _.assert(SCHEMA.data, resp.type);
-    this._storeList(resp.items);
+  // Invoked after the ajax call in `#fetch()` succeeds. Subscribes for updates
+  // and sends a sync request to the server with the IDs and timestamps of
+  // records in the cache.
+  Cache.prototype._onFetch = function(options, resp, status, xhr) {
+
+    //} subscribe to faye channel
     this._subscribe(xhr);
-    success(resp.items, status, xhr);
+
+    //} prepare cached data for server diff
+    var cached = {};
+    _.each(this._readDict(), function(item, id) {
+      cached[id] = item.updated_at;
+    });
+    _.defaults(options.data, { cached: cached });
+
+    var onDelta = _.bind(this._onDelta, this);
+    options.success = function(resp) {
+      _.assert(SCHEMA.sync, resp.type);
+      _.each(resp.deltas, onDelta);
+    };
+
+    options.headers[names.headers.request] = 'sync';
+    this._ajax(options);
+
   };
 
-  // Subscribe to Faye channel for changes. Uses one channel for each client.
+  // Subscribe to Faye channel for changes.
   Cache.prototype._subscribe = function(xhr) {
     var channel = xhr.getResponseHeader(names.headers.channel);
     this.client = new Faye.Client(config.paths.bayeux);
@@ -98,27 +135,28 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
   };
 
   // Responds to changes on server and propagates them to the client.
-  Cache.prototype._onDelta = function(message) {
+  Cache.prototype._onDelta = function(delta) {
 
-    var delta = $.parseJSON(message);
+    //} `instanceof String` doesn't always work. Lame.
+    if (typeof delta === "string") delta = $.parseJSON(delta);
     var that = this;
 
-    // Ignore invalid deltas or deltas from this client.
-    if (_.isEmpty(delta.origin) || config.id == delta.origin) return;
+    // Ignore deltas from this client.
+    if (config.id == delta.origin) return;
 
     switch (delta.action) {
       case 'create':
-        that._onCreate(null, function(item) {
+        this._onCreate(null, function(item) {
           that.collection.add(new that.collection.model(item));
         }, delta);
         break;
       case 'update':
-        that._onUpdate(null, function(item) {
+        this._onUpdate(null, function(item) {
           that.collection.get(item.id).set(item);
         }, delta);
         break;
       case 'destroy':
-        that._onDestroy(null, function(item) {
+        this._onDestroy(null, function(item) {
           that.collection.remove(item.id);
         }, delta);
         break;
@@ -195,6 +233,13 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
     success(resp.item, status, xhr);
   };
 
+  // Retrieves dictionary of items from HTML5 local storage.
+  Cache.prototype._readDict = function() {
+    var dict = amplify.store(this.key);
+    if (_.isEmpty(dict)) return {};
+    return dict;
+  };
+
   // Stores the given list into HTML5 local storage.
   Cache.prototype._storeList = function(list) {
     // map id to item
@@ -205,7 +250,7 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
 
   // Stores the given item into HTML5 local storage.
   Cache.prototype._storeItem = function(item) {
-    var dict = amplify.store(this.key);
+    var dict = amplify.store(this.key) || {};
     dict[item.id] = item;
     amplify.store(this.key, dict);
   };
