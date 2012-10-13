@@ -1,7 +1,10 @@
+language:
+  - ruby
+  - node_js
 install:
   - bundle install
   - npm install
 rvm:
   - 1.9.3
-node:
+node_js:
   - 0.8.8
