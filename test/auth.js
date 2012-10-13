@@ -1,5 +1,6 @@
 var requirejs = require('./test_helper'),
-    sinon = require('sinon');
+    sinon     = require('sinon');
+require('sinon-mocha').enhance(sinon);
 
 requirejs(['reaction/auth'], function(auth) {
 
