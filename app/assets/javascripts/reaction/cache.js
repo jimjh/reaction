@@ -237,9 +237,7 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
 
   // Retrieves dictionary of items from HTML5 local storage.
   Cache.prototype._readDict = function() {
-    var dict = amplify.store(this.key);
-    if (_.isEmpty(dict)) return {};
-    return dict;
+    return amplify.store(this.key) || {};
   };
 
   // Stores the given list into HTML5 local storage.
@@ -250,8 +248,8 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
     amplify.store(this.key, dict);
   };
 
-  // Stores the given item into HTML5 local storage. No-op if cached already
-  // contains an item with the same ID and has a new `updated_at`.
+  // Stores the given item into HTML5 local storage. No-op if cache already
+  // contains an item with the same ID and has a newer `updated_at`.
   Cache.prototype._storeItem = function(item) {
     var dict = amplify.store(this.key) || {};
     if (!_.isEmpty(dict[item.id]) &&
