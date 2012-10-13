@@ -1,7 +1,4 @@
 --reporter spec
 --require should
 --require sinon
---globals window
---globals document
---globals navigator
---globals $
+--globals window,document,navigator,$
