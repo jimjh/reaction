@@ -41,14 +41,13 @@ namespace :ci do
   desc 'Install PhantomJS'
   task :install_phantomjs do
     sh <<-script
-      sudo su -c \
+      sudo bash -c \
       'version=phantomjs-1.7.0-linux-i686;
        wget http://phantomjs.googlecode.com/files/$version.tar.bz2;
        tar xjf $version.tar.bz2;
        mv $version phantomjs;
        exit'
     script
-    sh 'export PATH=phantomjs/bin:$PATH'
   end
 
 end
