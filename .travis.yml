@@ -3,3 +3,5 @@ install:
   - npm install
 rvm:
   - 1.9.3
+node:
+  - 0.8.8
