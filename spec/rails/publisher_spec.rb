@@ -19,15 +19,15 @@ describe 'Rails app' do
     it 'should return data in REACTION mime type if .reaction extension is present' do
       get "/#{controller}/index.reaction"
       last_response.should be_ok
-      last_response.content_type.should match %r{^application/vnd\.reaction\.v1}
-      last_response.body.should match @data.to_json
+      content_type.should match %r{^application/vnd\.reaction\.v1}
+      body.should match @data.to_json
     end
 
     it 'should return data in REACTION mime type if Accepts header is present' do
       get "/#{controller}/index.reaction", {}, {'HTTP_ACCEPT' => 'application/vnd.reaction.v1'}
       last_response.should be_ok
-      last_response.content_type.should match %r{^application/vnd\.reaction\.v1}
-      last_response.body.should match @data.to_json
+      content_type.should match %r{^application/vnd\.reaction\.v1}
+      body.should match @data.to_json
     end
 
   end

@@ -22,8 +22,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake', '~> 0.9'
   gem.add_development_dependency 'rack-test'
   gem.add_development_dependency 'debugger-pry'
-  gem.add_development_dependency 'capybara', '~> 1.0'
-  gem.add_development_dependency 'poltergeist', '~> 1.0'
 
   # Documentation Stuff
   gem.add_development_dependency 'yard'

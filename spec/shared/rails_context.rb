@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'dummy-rails/spec/spec_helper'
-
 require 'reaction/rails/require'
 
 shared_context 'rails app' do
