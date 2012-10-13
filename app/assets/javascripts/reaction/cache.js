@@ -180,7 +180,8 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
   };
 
   // Validates the format of the received data and saves it in a HTML5 local
-  // storage. Invoked when #create() succeeds.
+  // storage. Invoked when #create() succeeds, or when a delta is received. If
+  // the object already exists, it's ignored.
   Cache.prototype._onCreate = function(model, success, resp, status, xhr) {
     _.assert(SCHEMA.datum, resp.type);
     this._storeItem(resp.item);
@@ -205,7 +206,8 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
   };
 
   // Validates format of the received data and saves it in a HTML5 local
-  // storage. Invoked when `update()` succeeds.
+  // storage. Invoked when `update()` succeeds, or when a delta is received. If
+  // the delta is older than the cached item, it's ignored.
   Cache.prototype._onUpdate = function(model, success, resp, status, xhr) {
     _.assert(SCHEMA.datum, resp.type);
     this._storeItem(resp.item);
@@ -248,9 +250,12 @@ define(['./config', './names', './auth', './util', 'amplify', 'faye/client'],
     amplify.store(this.key, dict);
   };
 
-  // Stores the given item into HTML5 local storage.
+  // Stores the given item into HTML5 local storage. No-op if cached already
+  // contains an item with the same ID and has a new `updated_at`.
   Cache.prototype._storeItem = function(item) {
     var dict = amplify.store(this.key) || {};
+    if (!_.isEmpty(dict[item.id]) &&
+        dict[item.id].updated_at >= item.updated_at) return;
     dict[item.id] = item;
     amplify.store(this.key, dict);
   };
