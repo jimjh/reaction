@@ -48,6 +48,7 @@ namespace :ci do
        mv $version phantomjs;
        exit'
     script
+    sh 'export PATH=phantomjs/bin:$PATH'
   end
 
 end
