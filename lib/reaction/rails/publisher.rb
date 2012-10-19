@@ -143,19 +143,27 @@ module Reaction
 
       end
 
-      # Broadcasts the specified action to all subscribed clients.
+      # Broadcasts the specified action to all subscribed clients. The options
+      # parameter is a hash of actions to data items. Takes an optional filter.
+      #
+      # @yield [channel_id] Gives channel ID to the filter. Block should return
+      #                     false to reject the given channel.
       # @example
       #   broadcast create: @post
+      #   broadcast create: @posts
+      #
       # TODO: smarter broadcast w. auto detect
       # TODO: use an after filter?
+      #
       # @return [void]
-      def broadcast(options)
+      def broadcast(opts)
 
-        options.each do |action, delta|
+        opts.each do |action, delta|
           delta = Serializer.format_data delta.attributes,
             action: action,
             origin: params[:origin]
           Reaction.registry.each { |channel_id|
+            next if block_given? and not yield channel_id
             ::Reaction.logger.debug "Sending delta to #{channel_id}"
             channel = "/#{self.controller_name}/#{channel_id}"
             Reaction.bayeux.get_client.publish(channel, delta)
