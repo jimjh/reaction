@@ -2,7 +2,7 @@ var requirejs = require('./test_helper'),
     sinon     = require('sinon');
 require('sinon-mocha').enhance(sinon);
 
-requirejs(['reaction/util'], function() {
+requirejs(['underscore', 'reaction/util'], function() {
 
   describe('Util', function() {
 

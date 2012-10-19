@@ -20,7 +20,7 @@
 //      collection.bind(..., ...);
 //
 //      collection.fetch(); // fires the add events
-define(['reaction/cache', 'reaction/model', 'reaction/sync', 'reaction/util', 'backbone'],
+define(['./cache', './model', './sync', './util'],
        function(Cache, Model, sync) {
 
   'use strict';

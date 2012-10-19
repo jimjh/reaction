@@ -11,7 +11,7 @@
 
 // ## reaction-util Module
 // Collection of utility functions that I like.
-define(['underscore'], function(){
+define(function(){
 
   'use strict';
 

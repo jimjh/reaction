@@ -10,7 +10,7 @@
 /*global Backbone:true*/
 
 // # reaction-model Module.
-define(['reaction/sync', 'backbone'], function(sync){
+define(['./sync'], function(sync){
 
   'use strict';
 

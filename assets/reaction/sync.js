@@ -10,7 +10,7 @@
 
 // # reaction-sync Module
 // Provides a sync function for Backbone that uses a write-through cache.
-define(['reaction/util'], function(){
+define(['./util'], function(){
 
   'use strict';
 
