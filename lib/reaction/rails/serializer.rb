@@ -59,7 +59,7 @@ module Reaction
               create_d new
             end
           end
-          cached.each { |missing| sync[:deltas] << destroy_d(id: missing) }
+          cached.each { |missing| sync[:deltas] << destroy_d(id: missing[0]) }
           sync.to_json
         end
 
