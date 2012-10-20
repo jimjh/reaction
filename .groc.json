@@ -1,5 +1,5 @@
 {
-  "glob": ["app/assets/javascripts/**/*.js"],
-  "except": ["app/assets/javascripts/faye/client.js"],
+  "glob": ["assets/**/*.js"],
+  "except": ["assets/faye/client.js"],
   "out": "doc/js"
 }

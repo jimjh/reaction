@@ -1,5 +1,8 @@
-var requirejs = require('requirejs');
-var path = require('path');
+var requirejs = require('requirejs'),
+    path      = require('path'),
+    sinon     = require('sinon');
+
+require('sinon-mocha').enhance(sinon);
 
 const APP_PATH = path.normalize(__dirname + '/../assets/');
 const VENDOR_PATH = path.normalize(__dirname + '/../vendor/assets/javascripts/reaction/');
@@ -18,4 +21,4 @@ requirejs.config({
   nodeRequire: require
 });
 
-module.exports = requirejs;
+module.exports = {require: requirejs, sinon: sinon};

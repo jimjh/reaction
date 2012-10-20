@@ -1,8 +1,7 @@
-var requirejs = require('./test_helper'),
-    sinon     = require('sinon');
-require('sinon-mocha').enhance(sinon);
+var test = require('./test_helper');
+var sinon = test.sinon;
 
-requirejs(['underscore', 'reaction/auth'], function(x, auth) {
+test.require(['underscore', 'reaction/auth'], function(x, auth) {
 
   describe('Auth', function() {
 
