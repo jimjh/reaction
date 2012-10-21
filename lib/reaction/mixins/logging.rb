@@ -27,7 +27,8 @@ module Reaction
 
       # Maps environment (production/development/test) to log levels.
       LOG_CONCERNS = {'production' => ::Logger::ERROR,
-                      'development' => ::Logger::DEBUG}
+                      'development' => ::Logger::DEBUG,
+                      'test' => ::Logger::FATAL}
 
       class << self
 

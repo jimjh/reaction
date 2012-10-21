@@ -91,8 +91,12 @@ module Reaction
       # before_filter for +:index+.
       # @return [void]
       def self.included(base)
+
         base.respond_to :reaction
         base.before_filter :ensure_channel, only: [:index]
+
+        Reaction.bayeux.get_client.add_extension Signer.new unless Reaction.bayeux.nil?
+
       end
 
       # Renders given resource in the reaction format.

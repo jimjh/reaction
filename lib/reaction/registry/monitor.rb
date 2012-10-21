@@ -8,6 +8,7 @@ module Reaction
     # Watches Faye for connect and disconnect. Most of it uses messages, but it
     # also relies on low-level events to watch for disconnects.
     class Monitor
+      include Mixins::Logging
 
       # Token expires after 15 minutes.
       EXPIRY = 15 * 60
@@ -25,24 +26,30 @@ module Reaction
       # Intercepts subscribe requests and registers client id with channel ids.
       def incoming(message, callback)
 
-        # Let non-connect and non-disconnect messages through.
-        unless is_subscribe? message
-          return callback.call(message)
+        case message['channel']
+        when '/meta/subscribe'
+          channel = Pathname.new(message['subscription']).basename.to_s
+          return callback.call(error message) unless is_authorized? message, channel
+          Reaction.registry.add(channel, message['clientId'])
+        when %r{^/meta/}
+        else
+          unless is_server?(message)
+            warn { "Message #{message} denied." }
+            return callback.call(error message)
+          end
         end
 
-        channel = Pathname.new(message['subscription']).basename.to_s
-        return callback.call(error message) unless is_authorized? message, channel
-
-        Reaction.registry.add(channel, message['clientId'])
         callback.call(message)
 
       end
 
       private
 
-      # @return [Boolean] true iff the message is a subscribe request
-      def is_subscribe?(message)
-        '/meta/subscribe' == message['channel']
+      # @return [Boolean] true iff the message contains a valid signature.
+      def is_server?(message)
+        return false unless message.key?('ext') and message['ext'].key?('signature')
+        expected = Base64.encode64(OpenSSL::HMAC.digest('sha256', @salt, message['data']))
+        expected == message['ext']['signature']
       end
 
       # Checks the access token against

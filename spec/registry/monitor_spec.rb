@@ -26,6 +26,10 @@ describe 'Monitor' do
       base
     end
 
+    def publish(channel, data)
+      return {'channel' => channel, 'clientId' => 0, 'data' => data}
+    end
+
     def authorized(channel, opts={})
       components = {
         channel_id: channel,
@@ -107,6 +111,48 @@ describe 'Monitor' do
 
       auth = authorized channel, date: 14.minutes.ago.to_i.to_s
       message['ext']['auth'] = auth
+
+      callback = double('Proc')
+      callback.should_receive(:call).once.with(message.clone.freeze)
+      @monitor.incoming message, callback
+
+    end
+
+    it 'should deny publish messages without signatures' do
+
+      channel = 'xyz'
+      message = publish channel, :hello => 'world'
+      callback = double('Proc')
+      callback.should_receive(:call).once.with(forbidden)
+      @monitor.incoming message, callback
+
+    end
+
+    it 'should deny publish messages with invalid signatures' do
+
+      channel = 'xyz'
+      data = {:hello => 'world'}.to_json
+      message = publish channel, data
+
+      callback = double('Proc')
+      callback.should_receive(:call).once.with(hash_including('data' => data))
+      Reaction::Rails::Signer.new(@salt).outgoing(message, callback)
+
+      callback = double('Proc')
+      callback.should_receive(:call).once.with(message.clone.freeze)
+      @monitor.incoming message, callback
+
+    end
+
+    it 'should allow publish messages with valid signatures' do
+
+      channel = 'xyz'
+      data = {:hello => 'world'}.to_json
+      message = publish channel, data
+
+      callback = double('Proc')
+      callback.should_receive(:call).once.with(hash_including('data' => data))
+      Reaction::Rails::Signer.new(@salt).outgoing(message, callback)
 
       callback = double('Proc')
       callback.should_receive(:call).once.with(message.clone.freeze)
