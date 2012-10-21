@@ -1,6 +1,6 @@
 {
   "name": "reaction",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "dependencies" : {
     "mocha": ">= 1.6.0",
     "sinon": ">= 1.3",
