@@ -9,9 +9,6 @@ RSpec::Core::RakeTask.new 'spec'
 desc 'runs all RSpec test examples'
 task :default => [:test, :spec]
 
-# TODO: write a raketask to compile/optimize javascripts (exclude vendor
-# scripts)
-
 desc 'Executes the Javascript test cases'
 task :test do
   sh 'mocha', 'test'
