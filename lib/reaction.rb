@@ -8,8 +8,9 @@ module Reaction
 
   class << self
 
-    # Only one bayeux server per process for now
-    attr_accessor :bayeux
+    # @!attribute [rw] client
+    #   @return bayeux client
+    attr_accessor :client
 
     # @!attribute [rw] registry
     #   @return [Reaction::Registry] registry of connected clients.

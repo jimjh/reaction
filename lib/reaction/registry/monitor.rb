@@ -1,8 +1,6 @@
 module Reaction
 
-  # --
-  #} FIXME: rejected connections don't seem to be deleted
-  #} FIXME: publish should be protected
+  # Registry
   class Registry
 
     # Watches Faye for connect and disconnect. Most of it uses messages, but it
@@ -60,7 +58,6 @@ module Reaction
       # @param [Hash]    message
       # @param [String]  channel ID
       # @return [Boolean] true iff the message is authorized.
-      # FIXME: only works for in-process
       def is_authorized?(message, channel)
         has_auth? message and
           has_auth_keys? message and

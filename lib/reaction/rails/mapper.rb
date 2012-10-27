@@ -9,6 +9,16 @@ module ActionDispatch::Routing
   # Monkey-patched ActionDispatch mapper.
   class Mapper
 
+    # Uses an external reaction server.
+    # @example Using an external reaction server at +localhost:9292/reaction+.
+    #   use_reaction :at => 'http://localhost:9292/reaction'
+    # @option opts [String] :at     URL of external reaction server.
+    # @return [void]
+    def use_reaction(opts = {})
+      opts = use_reaction_defaults opts
+      Reaction.client = Faye::Client.new opts[:at]
+    end
+
     # Mounts reaction server.
     # @example Mapping +'/reaction'+ to the reaction server.
     #   mount_reaction :at => '/reaction', :server => 'thin'
@@ -19,31 +29,42 @@ module ActionDispatch::Routing
     # @return [void]
     def mount_reaction(opts = {})
 
-      raise RuntimeError, 'Reaction already mounted.' if Reaction.bayeux
+      raise RuntimeError, 'Reaction already mounted.' if Reaction.client
 
-      opts = defaultize opts
+      opts = mount_reaction_defaults opts
       path = opts.delete :at
       server = opts.delete :server
 
       Faye::WebSocket.load_adapter server
+      bayeux = Reaction::Adapters::RackAdapter.new(opts)
+
       Reaction.registry = Reaction::Registry.new
-      Reaction.bayeux = Reaction::Adapters::RackAdapter.new(opts)
-
       monitor = Reaction::Registry::Monitor.new \
-        Reaction.bayeux,
+        bayeux,
         Rails.application.config.secret_token
-      Reaction.bayeux.add_extension monitor
+      bayeux.add_extension monitor
 
-      mount Reaction.bayeux, at: path
+      mount bayeux, at: path
+      Reaction.client = bayeux.get_client
 
     end
 
     private
 
-    # Populates opts for reaction server with defaults.
+    # Populates +opts+ for reaction server with defaults.
     # @param [Hash] opts          hash of options
     # @return [Hash] defaultized options
-    def defaultize(opts)
+    def use_reaction_defaults(opts)
+      defaults = {
+        at: 'http://localhost:9292/reaction'
+      }
+      opts = defaults.merge opts
+    end
+
+    # Populates +opts+ for reaction server with defaults.
+    # @param [Hash] opts          hash of options
+    # @return [Hash] defaultized options
+    def mount_reaction_defaults(opts)
       defaults = {
         at: '/reaction',
         server: 'thin'

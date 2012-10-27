@@ -95,7 +95,7 @@ module Reaction
         base.respond_to :reaction
         base.before_filter :ensure_channel, only: [:index]
 
-        Reaction.bayeux.get_client.add_extension Signer.new unless Reaction.bayeux.nil?
+        Reaction.client.add_extension Signer.new unless Reaction.client.nil?
 
       end
 
@@ -166,11 +166,12 @@ module Reaction
           delta = Serializer.format_data delta.attributes,
             action: action,
             origin: params[:origin]
+          # FIXME: need another way to get registry
           Reaction.registry.each { |channel_id|
             next if block_given? and not yield channel_id
             ::Reaction.logger.debug "Sending delta to #{channel_id}"
             channel = "/#{self.controller_name}/#{channel_id}"
-            Reaction.bayeux.get_client.publish(channel, delta)
+            Reaction.client.publish(channel, delta)
           }
         end
 
