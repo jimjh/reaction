@@ -168,4 +168,52 @@ describe 'Rails app' do
     it_should_behave_like 'a published, authenticated app'
   end
 
+  context 'filtering broadcasts' do
+
+    let(:delta) { Struct.new(:attributes) }
+
+    before(:each) do
+      @ctrl = DefaultController.new
+      @ctrl.params = {origin: 'x'}
+    end
+
+    it 'should broadcast a single action' do
+
+      data = [1, 2, 3]
+
+      Reaction.client = double('client')
+      Reaction.client.should_receive(:publish).once.with 'default',
+        '{"type":"data","items":%s,"action":"create","origin":"x"}' % data.to_json,
+        to: /.*/, except: []
+      @ctrl.broadcast create: delta.new(data)
+
+    end
+
+    it 'should broadcast all actions' do
+
+      Reaction.client = double('client')
+
+      data1 = [1, 2, 3]
+      Reaction.client.should_receive(:publish).once.with 'default',
+        '{"type":"data","items":%s,"action":"create","origin":"x"}' % data1.to_json,
+        to: /.*/, except: []
+
+      data2 = ['x', 'y', 'z']
+      Reaction.client.should_receive(:publish).once.with 'default',
+        '{"type":"data","items":%s,"action":"destroy","origin":"x"}' % data2.to_json,
+        to: /.*/, except: []
+
+      data3 = {a: 'whatever'}
+      Reaction.client.should_receive(:publish).once.with 'default',
+        '{"type":"datum","item":%s,"action":"update","origin":"x"}' % data3.to_json,
+        to: /.*/, except: []
+
+      @ctrl.broadcast create: delta.new(data1),
+                      destroy: delta.new(data2),
+                      update: delta.new(data3)
+
+    end
+
+  end
+
 end

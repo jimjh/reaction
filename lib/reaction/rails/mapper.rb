@@ -16,7 +16,8 @@ module ActionDispatch::Routing
     # @return [void]
     def use_reaction(opts = {})
       opts = use_reaction_defaults opts
-      Reaction.client = Faye::Client.new opts[:at]
+      faye = Faye::Client.new opts[:at]
+      Reaction.client = Reaction::Client.new faye
     end
 
     # Mounts reaction server.
@@ -45,7 +46,7 @@ module ActionDispatch::Routing
       bayeux.add_extension monitor
 
       mount bayeux, at: path
-      Reaction.client = bayeux.get_client
+      Reaction.client = Reaction::Client.new bayeux.get_client
 
     end
 

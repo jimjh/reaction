@@ -57,6 +57,7 @@ module Reaction
 
   require_package :adapters
   require_package :registry
+  require_package :client
   require_package :rails if in_rails?
 
 

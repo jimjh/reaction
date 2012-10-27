@@ -148,10 +148,8 @@ module Reaction
       end
 
       # Broadcasts the specified action to all subscribed clients. The options
-      # parameter is a hash of actions to data items. Takes an optional filter.
+      # parameter is a hash of actions to data items.
       #
-      # @yield [channel_id] Gives channel ID to the filter. Block should return
-      #                     false to reject the given channel.
       # @example
       #   broadcast create: @post
       #   broadcast create: @posts
@@ -159,20 +157,22 @@ module Reaction
       # TODO: smarter broadcast w. auto detect
       # TODO: use an after filter?
       #
+      # @option opts :to      can be a regular expression or an array, defaults
+      #                       to all
+      # @option opts :except  can be a regular expression or an array,
+      #                       defaults to none
       # @return [void]
       def broadcast(opts)
+
+        filter = {}
+        filter[:to] = opts.delete(:to) || /.*/
+        filter[:except] = opts.delete(:except) || []
 
         opts.each do |action, delta|
           delta = Serializer.format_data delta.attributes,
             action: action,
             origin: params[:origin]
-          # FIXME: need another way to get registry
-          Reaction.registry.each { |channel_id|
-            next if block_given? and not yield channel_id
-            ::Reaction.logger.debug "Sending delta to #{channel_id}"
-            channel = "/#{self.controller_name}/#{channel_id}"
-            Reaction.client.publish(channel, delta)
-          }
+          Reaction.client.publish(controller_name, delta, filter)
         end
 
       end
