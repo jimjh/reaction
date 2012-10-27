@@ -168,7 +168,7 @@ describe 'Rails app' do
     it_should_behave_like 'a published, authenticated app'
   end
 
-  context 'filtering broadcasts' do
+  context 'broadcasting actions' do
 
     let(:delta) { Struct.new(:attributes) }
 
@@ -184,7 +184,7 @@ describe 'Rails app' do
       Reaction.client = double('client')
       Reaction.client.should_receive(:broadcast).once.with 'default',
         '{"type":"data","items":%s,"action":"create","origin":"x"}' % data.to_json,
-        to: /.*/, except: []
+        to: nil, except: nil
       @ctrl.broadcast create: delta.new(data)
 
     end
@@ -196,17 +196,17 @@ describe 'Rails app' do
       data1 = [1, 2, 3]
       Reaction.client.should_receive(:broadcast).once.with 'default',
         '{"type":"data","items":%s,"action":"create","origin":"x"}' % data1.to_json,
-        to: /.*/, except: []
+        to: nil, except: nil
 
       data2 = ['x', 'y', 'z']
       Reaction.client.should_receive(:broadcast).once.with 'default',
         '{"type":"data","items":%s,"action":"destroy","origin":"x"}' % data2.to_json,
-        to: /.*/, except: []
+        to: nil, except: nil
 
       data3 = {a: 'whatever'}
       Reaction.client.should_receive(:broadcast).once.with 'default',
         '{"type":"datum","item":%s,"action":"update","origin":"x"}' % data3.to_json,
-        to: /.*/, except: []
+        to: nil,  except: nil
 
       @ctrl.broadcast create: delta.new(data1),
                       destroy: delta.new(data2),

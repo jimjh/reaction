@@ -6,10 +6,11 @@ module Reaction
     BROADCAST = '/__broadcast_'
 
     # Creates a new reaction client.
-    # @param [Faye::Client] faye client
-    def initialize(faye)
-      @faye = faye
-      @faye.add_extension Signer.new
+    # @param [Faye::Client] client    bayeux client
+    # @param [String]       key       key for {Signer}
+    def initialize(client, key)
+      @faye = client
+      @faye.add_extension Signer.new(key)
     end
 
     # Publishes message to zero or more channels.
@@ -30,11 +31,6 @@ module Reaction
 
       @faye.publish BROADCAST, Marshal.dump(encap)
 
-    end
-
-    # Forwards methods to delegate.
-    def method_missing(m, *args, &block)
-      @faye.public_send m, *args, &block
     end
 
   end

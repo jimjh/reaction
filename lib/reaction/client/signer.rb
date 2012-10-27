@@ -3,10 +3,10 @@ module Reaction
     # Faye extension that adds a message signature to every broadcast message.
     class Client::Signer
 
-      # Initializes the signer with a secret salt.
-      # @param [String] salt        secret token
-      def initialize(salt = ::Rails.application.config.secret_token)
-        @salt = salt
+      # Initializes the signer with a secret key.
+      # @param [String] key        secret key
+      def initialize(key)
+        @key = key
       end
 
       # Adds a signature to every outgoing publish message.
@@ -18,7 +18,7 @@ module Reaction
         end
 
         message['ext'] ||= {}
-        signature = OpenSSL::HMAC.digest('sha256', @salt, message['data'])
+        signature = OpenSSL::HMAC.digest('sha256', @key, message['data'])
         message['ext']['signature'] = Base64.encode64(signature)
 
         callback.call(message)
