@@ -91,12 +91,8 @@ module Reaction
       # before_filter for +:index+.
       # @return [void]
       def self.included(base)
-
         base.respond_to :reaction
         base.before_filter :ensure_channel, only: [:index]
-
-        Reaction.client.add_extension Signer.new unless Reaction.client.nil?
-
       end
 
       # Renders given resource in the reaction format.
@@ -154,9 +150,6 @@ module Reaction
       #   broadcast create: @post
       #   broadcast create: @posts
       #
-      # TODO: smarter broadcast w. auto detect
-      # TODO: use an after filter?
-      #
       # @option opts :to      can be a regular expression or an array, defaults
       #                       to all
       # @option opts :except  can be a regular expression or an array,
@@ -164,15 +157,14 @@ module Reaction
       # @return [void]
       def broadcast(opts)
 
-        filter = {}
-        filter[:to] = opts.delete(:to) || /.*/
-        filter[:except] = opts.delete(:except) || []
+        filter = { to:      opts.delete(:to),
+                   except:  opts.delete(:except) }
 
         opts.each do |action, delta|
           delta = Serializer.format_data delta.attributes,
             action: action,
             origin: params[:origin]
-          Reaction.client.publish(controller_name, delta, filter)
+          Reaction.client.broadcast(controller_name, delta, filter)
         end
 
       end

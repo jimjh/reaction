@@ -182,7 +182,7 @@ describe 'Rails app' do
       data = [1, 2, 3]
 
       Reaction.client = double('client')
-      Reaction.client.should_receive(:publish).once.with 'default',
+      Reaction.client.should_receive(:broadcast).once.with 'default',
         '{"type":"data","items":%s,"action":"create","origin":"x"}' % data.to_json,
         to: /.*/, except: []
       @ctrl.broadcast create: delta.new(data)
@@ -194,17 +194,17 @@ describe 'Rails app' do
       Reaction.client = double('client')
 
       data1 = [1, 2, 3]
-      Reaction.client.should_receive(:publish).once.with 'default',
+      Reaction.client.should_receive(:broadcast).once.with 'default',
         '{"type":"data","items":%s,"action":"create","origin":"x"}' % data1.to_json,
         to: /.*/, except: []
 
       data2 = ['x', 'y', 'z']
-      Reaction.client.should_receive(:publish).once.with 'default',
+      Reaction.client.should_receive(:broadcast).once.with 'default',
         '{"type":"data","items":%s,"action":"destroy","origin":"x"}' % data2.to_json,
         to: /.*/, except: []
 
       data3 = {a: 'whatever'}
-      Reaction.client.should_receive(:publish).once.with 'default',
+      Reaction.client.should_receive(:broadcast).once.with 'default',
         '{"type":"datum","item":%s,"action":"update","origin":"x"}' % data3.to_json,
         to: /.*/, except: []
 

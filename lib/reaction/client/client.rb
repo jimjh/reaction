@@ -3,10 +3,13 @@ module Reaction
   # Pub/Sub client.
   class Client
 
+    BROADCAST = '/__broadcast_'
+
     # Creates a new reaction client.
     # @param [Faye::Client] faye client
     def initialize(faye)
       @faye = faye
+      @faye.add_extension Signer.new
     end
 
     # Publishes message to zero or more channels.
@@ -16,34 +19,22 @@ module Reaction
     #                         to all.
     # @option opts :except    can be a regular expression or an array, defaults
     #                         to none.
-    def publish(name, message, opts={})
+    def broadcast(name, message, opts={})
 
-      to = opts[:to] || /.*/
-      except = opts[:except] || []
+      # encapsulation
+      encap = { n: name,
+                m: message,
+                t: opts[:to] || /.*/,
+                e: opts[:except] || []
+              }
 
-      Reaction.registry.each { |channel_id|
-        next unless accept(to, channel_id) and not accept(except, channel_id)
-        channel = "/#{name}/#{channel_id}"
-        Reaction.client.publish(channel, delta)
-      }
+      @faye.publish BROADCAST, Marshal.dump(encap)
 
     end
 
     # Forwards methods to delegate.
     def method_missing(m, *args, &block)
-      @faye.send m, *args, &block
-    end
-
-    private
-
-    def accept(filter, value)
-      case filter
-      when Regex
-        return filter =~ value
-      when Array
-        return filter.include? value
-      end
-      raise RuntimeError, 'Regex or Array expected.'
+      @faye.public_send m, *args, &block
     end
 
   end

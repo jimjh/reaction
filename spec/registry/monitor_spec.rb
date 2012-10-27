@@ -136,7 +136,7 @@ describe 'Monitor' do
 
       callback = double('Proc')
       callback.should_receive(:call).once.with(hash_including('data' => data))
-      Reaction::Rails::Signer.new(@salt).outgoing(message, callback)
+      Reaction::Client::Signer.new(@salt).outgoing(message, callback)
 
       callback = double('Proc')
       callback.should_receive(:call).once.with(message.clone.freeze)
@@ -152,7 +152,7 @@ describe 'Monitor' do
 
       callback = double('Proc')
       callback.should_receive(:call).once.with(hash_including('data' => data))
-      Reaction::Rails::Signer.new(@salt).outgoing(message, callback)
+      Reaction::Client::Signer.new(@salt).outgoing(message, callback)
 
       callback = double('Proc')
       callback.should_receive(:call).once.with(message.clone.freeze)

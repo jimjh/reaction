@@ -1,10 +1,10 @@
 module Reaction
-  module Rails
 
     # Faye extension that adds a message signature to every broadcast message.
-    class Signer
+    class Client::Signer
 
       # Initializes the signer with a secret salt.
+      # @param [String] salt        secret token
       def initialize(salt = ::Rails.application.config.secret_token)
         @salt = salt
       end
@@ -27,5 +27,4 @@ module Reaction
 
     end
 
-  end
 end
