@@ -2,6 +2,7 @@ require 'set'
 require 'faye'
 require 'openssl'
 require 'logger'
+require 'pathname'
 require 'reaction/version'
 
 module Reaction

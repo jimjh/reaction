@@ -30,7 +30,7 @@ module Reaction
 
         case msg['channel']
         when '/meta/subscribe'
-          channel = Pathname.new(msg['subscription']).basename.to_s
+          channel = ::Pathname.new(msg['subscription']).basename.to_s
           return deny(msg, cb) unless is_authorized? msg, channel
           @reaction.registry.add(channel, msg['clientId'])
         when %r{^/meta/}
