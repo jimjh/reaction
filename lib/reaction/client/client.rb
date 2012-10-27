@@ -7,10 +7,8 @@ module Reaction
 
     # Creates a new reaction client.
     # @param [Faye::Client] client    bayeux client
-    # @param [String]       key       key for {Signer}
-    def initialize(client, key)
+    def initialize(client)
       @faye = client
-      @faye.add_extension Signer.new(key)
     end
 
     # Publishes message to zero or more channels.

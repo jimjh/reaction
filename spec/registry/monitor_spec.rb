@@ -14,9 +14,10 @@ describe 'Monitor' do
 
     before :each do
       @salt = SecureRandom.uuid
-      @bayeux = Faye::RackAdapter.new(:mount => '/faye', :timeout => 25)
-      @monitor = Reaction::Registry::Monitor.new @bayeux, @salt
-      Reaction.registry = Reaction::Registry.new
+      @reaction = Reaction::Adapters::RackAdapter.new :mount => '/faye',
+        :timeout => 25,
+        :key => @salt
+      @monitor = Reaction::Registry::Monitor.new @reaction, @salt
     end
 
     def subscribe(channel, auth=nil)
@@ -70,7 +71,7 @@ describe 'Monitor' do
       callback.should_receive(:call).once.with(message.clone.freeze)
       @monitor.incoming message, callback
 
-      Reaction.registry.should include(channel)
+      @reaction.registry.should include(channel)
 
     end
 

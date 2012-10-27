@@ -26,7 +26,10 @@ module ActionDispatch::Routing
 
       opts = use_reaction_defaults opts
       faye = Faye::Client.new opts[:at]
-      Reaction.client = Reaction::Client.new faye, opts[:key]
+      signer = Reaction::Client::Signer.new opts[:key]
+      faye.add_extension signer
+
+      Reaction.client = Reaction::Client.new faye
 
     end
 
@@ -50,18 +53,14 @@ module ActionDispatch::Routing
       raise RuntimeError, 'Reaction already mounted.' if Reaction.client
 
       opts = mount_reaction_defaults opts
-      at, server, key = opts.extract!(:at, :server, :key).values
+      path, server = opts.extract!(:at, :server).values
+      key = opts[:key]
 
       Faye::WebSocket.load_adapter server
-      bayeux = Reaction::Adapters::RackAdapter.new(opts)
+      reaction = Reaction::Adapters::RackAdapter.new opts
 
-      Reaction.registry = Reaction::Registry.new
-      monitor = Reaction::Registry::Monitor.new bayeux, key
-
-      bayeux.add_extension monitor
-      mount bayeux, at: at
-
-      Reaction.client = Reaction::Client.new bayeux.get_client, key
+      mount reaction, at: path
+      Reaction.client = Reaction::Client.new reaction.get_client
 
     end
 

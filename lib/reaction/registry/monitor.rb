@@ -12,15 +12,15 @@ module Reaction
       EXPIRY = 15 * 60
 
       # Creates a new monitor.
-      # @param          bayeux  bayuex server
-      # @param [String] salt    secret token
-      def initialize(bayeux, salt)
+      # @param          reaction  bayuex server
+      # @param [String] salt      secret token
+      def initialize(reaction, salt)
 
-        bayeux.bind(:disconnect) do |client_id|
-          Reaction.registry.remove client_id
+        reaction.bind(:disconnect) do |client_id|
+          reaction.registry.remove client_id
         end
 
-        @bayeux = bayeux
+        @reaction = reaction
         @salt = salt
 
       end
@@ -32,7 +32,7 @@ module Reaction
         when '/meta/subscribe'
           channel = Pathname.new(msg['subscription']).basename.to_s
           return deny(msg, cb) unless is_authorized? msg, channel
-          Reaction.registry.add(channel, msg['clientId'])
+          @reaction.registry.add(channel, msg['clientId'])
         when %r{^/meta/}
         else
           return app_push msg, cb
@@ -62,10 +62,10 @@ module Reaction
         encap = Marshal.load msg['data']
         name, msg, to, except = encap[:n], encap[:m], encap[:t], encap[:e]
 
-        Reaction.registry.each { |channel_id|
+        reaction.registry.each { |channel_id|
           next unless accept(to, channel_id) and not accept(except, channel_id)
           channel = "/#{name}/#{channel_id}"
-          @bayeux.get_client.publish(channel, msg)
+          @reaction.get_client.publish(channel, msg)
           # FIXME: these will get denied
         }
 

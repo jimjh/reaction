@@ -12,10 +12,6 @@ module Reaction
     #   @return bayeux client
     attr_accessor :client
 
-    # @!attribute [rw] registry
-    #   @return [Reaction::Registry] registry of connected clients.
-    attr_accessor :registry
-
     # @!attribute [r] paths
     #   @return [Paths] struct containing some convenience paths.
     attr_reader :paths
@@ -25,9 +21,12 @@ module Reaction
     attr_reader :logger
 
     # Loads package files.
-    # Usage:
+    #
+    # @example Including a package
     #   require_package :deps
-    # loads deps/require.rb, which loads everything else.
+    #
+    # Loads deps/require.rb, which loads everything else.
+    #
     # @param [Symbol] package         name of package to load
     # @return [Boolean] true if loaded, false otherwise
     def require_package(package)
