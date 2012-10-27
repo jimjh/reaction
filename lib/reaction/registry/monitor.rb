@@ -13,20 +13,24 @@ module Reaction
 
       # Creates a new monitor.
       # @param          reaction  bayuex server
-      # @param [String] salt      secret token
-      def initialize(reaction, salt)
+      # @param [String] key       secret token that is used to salt subscriber
+      #                           access tokens and to sign publish messages
+      #                           from the app.
+      def initialize(reaction, key)
 
         reaction.bind(:disconnect) do |client_id|
           reaction.registry.remove client_id
         end
 
         @reaction = reaction
-        @salt = salt
+        @key = key
 
       end
 
       # Intercepts subscribe requests and registers client id with channel ids.
       def incoming(msg, cb)
+
+        info msg
 
         case msg['channel']
         when '/meta/subscribe'
@@ -34,8 +38,7 @@ module Reaction
           return deny(msg, cb) unless is_authorized? msg, channel
           @reaction.registry.add(channel, msg['clientId'])
         when %r{^/meta/}
-        else
-          return app_push msg, cb
+        else return app_push msg, cb
         end
 
         cb.call(msg)
@@ -65,8 +68,8 @@ module Reaction
         reaction.registry.each { |channel_id|
           next unless accept(to, channel_id) and not accept(except, channel_id)
           channel = "/#{name}/#{channel_id}"
+          info { "pushing to #{channel_id}" }
           @reaction.get_client.publish(channel, msg)
-          # FIXME: these will get denied
         }
 
       end
@@ -75,7 +78,7 @@ module Reaction
       # @return [Boolean] true iff the msg contains a valid signature.
       def is_application?(msg)
         return false unless msg.key?('ext') and msg['ext'].key?('signature')
-        expected = Base64.encode64(OpenSSL::HMAC.digest('sha256', @salt, msg['data']))
+        expected = Base64.encode64(OpenSSL::HMAC.digest('sha256', @key, msg['data']))
         expected == msg['ext']['signature']
       end
 
@@ -120,7 +123,7 @@ module Reaction
           date: auth['date'],
           user_agent: auth['user_agent'],
           csrf: auth['csrf'],
-          salt: @salt
+          salt: @key
         expected == auth['token']
       end
 

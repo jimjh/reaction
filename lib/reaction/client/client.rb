@@ -2,13 +2,18 @@ module Reaction
 
   # Pub/Sub client.
   class Client
+    include Mixins::Logging
 
     BROADCAST = '/__broadcast_'
 
     # Creates a new reaction client.
     # @param [Faye::Client] client    bayeux client
-    def initialize(client)
+    # @param [String]       key       secret token
+    # FIXME: this code is messy - why do we have the secret token at so many
+    # different places?
+    def initialize(client, key)
       @faye = client
+      @key = key
     end
 
     # Publishes message to zero or more channels.
@@ -27,8 +32,14 @@ module Reaction
                 e: opts[:except] || []
               }
 
-      @faye.publish BROADCAST, Marshal.dump(encap)
+      EM.next_tick {
+        @faye.publish BROADCAST, Marshal.dump(encap)
+      }
 
+    end
+
+    def access_token(opts)
+      Registry::Auth.generate_token({salt: @key}.merge opts)
     end
 
   end

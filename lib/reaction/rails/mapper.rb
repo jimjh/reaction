@@ -27,10 +27,10 @@ module ActionDispatch::Routing
       opts = use_reaction_defaults opts
 
       EM.next_tick {
-        faye = Faye::Client.new opts[:at]
+        faye = Faye::Client.new(opts[:at] + '/bayeux')
         signer = Reaction::Client::Signer.new opts[:key]
         faye.add_extension signer
-        Reaction.client = Reaction::Client.new faye
+        Reaction.client = Reaction::Client.new faye, opts[:key]
       }
 
     end
@@ -56,13 +56,13 @@ module ActionDispatch::Routing
 
       opts = mount_reaction_defaults opts
       path, server = opts.extract!(:at, :server).values
-      key = opts[:key]
 
       Faye::WebSocket.load_adapter server
       reaction = Reaction::Adapters::RackAdapter.new opts
 
       mount reaction, at: path
-      Reaction.client = Reaction::Client.new reaction.get_client
+      Reaction.client = Reaction::Client.new reaction.get_client, opts[:key]
+      # uses (shares) in process client, so signer is already needed.
 
     end
 

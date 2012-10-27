@@ -126,12 +126,11 @@ module Reaction
 
         session[:_r_channel] ||= Helpers.generate_channel(self)
         date = Time.now.to_i.to_s
-        token = Registry::Auth.generate_token \
+        token = Reaction.client.access_token \
           channel_id: session[:_r_channel],
           date: date,
           user_agent: request.env['HTTP_USER_AGENT'] || '',
-          csrf: request.env['HTTP_X_CSRF_TOKEN'] || '',
-          salt: ::Rails.application.config.secret_token
+          csrf: request.env['HTTP_X_CSRF_TOKEN'] || ''
 
         response.headers.merge! \
           CHANNEL_HEADER => session[:_r_channel],
@@ -157,7 +156,7 @@ module Reaction
       # @return [void]
       def broadcast(opts)
 
-        filter = { to:      opts.delete(:to),
+        filter = {     to:  opts.delete(:to),
                    except:  opts.delete(:except) }
 
         opts.each do |action, delta|
