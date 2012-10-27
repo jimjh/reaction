@@ -25,11 +25,13 @@ module ActionDispatch::Routing
       raise RuntimeError, 'Already using Reaction.' if Reaction.client
 
       opts = use_reaction_defaults opts
-      faye = Faye::Client.new opts[:at]
-      signer = Reaction::Client::Signer.new opts[:key]
-      faye.add_extension signer
 
-      Reaction.client = Reaction::Client.new faye
+      EM.next_tick {
+        faye = Faye::Client.new opts[:at]
+        signer = Reaction::Client::Signer.new opts[:key]
+        faye.add_extension signer
+        Reaction.client = Reaction::Client.new faye
+      }
 
     end
 
