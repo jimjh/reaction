@@ -87,8 +87,6 @@ module ActionDispatch::Routing
         key: Rails.application.config.secret_token
       }
       opts = defaults.merge opts
-      opts.delete :mount
-      opts
     end
 
   end

@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+
+$:.unshift File.join(File.dirname(__FILE__), *%w[.. lib])
+
+require 'reaction'
+require 'optparse'
+
+# Validates command line options.
+def validate_options(opts)
+  [:key, :port].each do |s|
+    next if opts.include? s
+    puts "#{s} is required."
+    return false
+  end
+  true
+end
+
+# Parse command line options.
+options = {:server => 'thin'}
+opt_parser = OptionParser.new do |opts|
+
+  opts.banner = "Usage: reaction [options]"
+
+  opts.on('-k', '--key KEY', 'Key to use for signatures.') do |key|
+    options[:key] = key
+  end
+
+  opts.on('-p', '--port PORT', Integer, 'Port to listen on.') do |port|
+    options[:port] = port
+  end
+
+  opts.on('-s', '--server SERVER', 'Tell Faye which adapter to use.',
+                                   'Defaults to thin.') do |server|
+    options[:server] = server
+  end
+
+  opts.on('--version', 'Display current gem version.') do
+    puts 'reaction ' + Reaction::VERSION
+    exit 0
+  end
+
+end
+opt_parser.parse!
+
+validate_options(options) or exit 1
+
+# Start reaction server
+port = options.delete(:port)
+server = options.delete(:server)
+
+Faye::WebSocket.load_adapter server
+reaction = Reaction::Adapters::RackAdapter.new options
+reaction.listen(port)

@@ -12,10 +12,16 @@ module Reaction
 
       # @param [Hash] opts      usual Faye options + :key
       def initialize(opts)
+
         key = opts.delete(:key)
+        opts.delete(:mount)
+
+        raise RuntimeError, ':key is required' if key.nil?
+
         super opts
         monitor with: key
         sign with: key
+
       end
 
       private
