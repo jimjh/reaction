@@ -2,18 +2,16 @@ require 'set'
 require 'faye'
 require 'openssl'
 require 'logger'
+require 'pathname'
 require 'reaction/version'
 
 module Reaction
 
   class << self
 
-    # Only one bayeux server per process for now
-    attr_accessor :bayeux
-
-    # @!attribute [rw] registry
-    #   @return [Reaction::Registry] registry of connected clients.
-    attr_accessor :registry
+    # @!attribute [rw] client
+    #   @return bayeux client
+    attr_accessor :client
 
     # @!attribute [r] paths
     #   @return [Paths] struct containing some convenience paths.
@@ -24,9 +22,12 @@ module Reaction
     attr_reader :logger
 
     # Loads package files.
-    # Usage:
+    #
+    # @example Including a package
     #   require_package :deps
-    # loads deps/require.rb, which loads everything else.
+    #
+    # Loads deps/require.rb, which loads everything else.
+    #
     # @param [Symbol] package         name of package to load
     # @return [Boolean] true if loaded, false otherwise
     def require_package(package)
@@ -56,6 +57,7 @@ module Reaction
 
   require_package :adapters
   require_package :registry
+  require_package :client
   require_package :rails if in_rails?
 
 

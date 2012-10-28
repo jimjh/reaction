@@ -125,7 +125,7 @@ define(['./config', './names', './auth', './util', 'faye/client'],
   // Subscribe to Faye channel for changes.
   Cache.prototype._subscribe = function(xhr) {
     var channel = xhr.getResponseHeader(names.headers.channel);
-    this.client = new Faye.Client(config.paths.bayeux);
+    this.client = new Faye.Client(config.paths.reaction + '/bayeux');
     this.client.addExtension(auth({
       token: xhr.getResponseHeader(names.headers.token),
       date: xhr.getResponseHeader(names.headers.date)

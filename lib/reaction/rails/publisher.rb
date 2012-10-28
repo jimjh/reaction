@@ -91,12 +91,8 @@ module Reaction
       # before_filter for +:index+.
       # @return [void]
       def self.included(base)
-
         base.respond_to :reaction
         base.before_filter :ensure_channel, only: [:index]
-
-        Reaction.bayeux.get_client.add_extension Signer.new unless Reaction.bayeux.nil?
-
       end
 
       # Renders given resource in the reaction format.
@@ -130,12 +126,11 @@ module Reaction
 
         session[:_r_channel] ||= Helpers.generate_channel(self)
         date = Time.now.to_i.to_s
-        token = Registry::Auth.generate_token \
+        token = Reaction.client.access_token \
           channel_id: session[:_r_channel],
           date: date,
           user_agent: request.env['HTTP_USER_AGENT'] || '',
-          csrf: request.env['HTTP_X_CSRF_TOKEN'] || '',
-          salt: ::Rails.application.config.secret_token
+          csrf: request.env['HTTP_X_CSRF_TOKEN'] || ''
 
         response.headers.merge! \
           CHANNEL_HEADER => session[:_r_channel],
@@ -148,30 +143,27 @@ module Reaction
       end
 
       # Broadcasts the specified action to all subscribed clients. The options
-      # parameter is a hash of actions to data items. Takes an optional filter.
+      # parameter is a hash of actions to data items.
       #
-      # @yield [channel_id] Gives channel ID to the filter. Block should return
-      #                     false to reject the given channel.
       # @example
       #   broadcast create: @post
       #   broadcast create: @posts
       #
-      # TODO: smarter broadcast w. auto detect
-      # TODO: use an after filter?
-      #
+      # @option opts :to      can be a regular expression or an array, defaults
+      #                       to all
+      # @option opts :except  can be a regular expression or an array,
+      #                       defaults to none
       # @return [void]
       def broadcast(opts)
+
+        filter = {     to:  opts.delete(:to),
+                   except:  opts.delete(:except) }
 
         opts.each do |action, delta|
           delta = Serializer.format_data delta.attributes,
             action: action,
             origin: params[:origin]
-          Reaction.registry.each { |channel_id|
-            next if block_given? and not yield channel_id
-            ::Reaction.logger.debug "Sending delta to #{channel_id}"
-            channel = "/#{self.controller_name}/#{channel_id}"
-            Reaction.bayeux.get_client.publish(channel, delta)
-          }
+          Reaction.client.broadcast(controller_name, delta, filter)
         end
 
       end
