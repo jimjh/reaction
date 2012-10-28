@@ -56,15 +56,17 @@ module ActionDispatch::Routing
 
       opts = mount_reaction_defaults opts
       path, server = opts.extract!(:at, :server).values
+      key = opts[:key]
 
       # create server
       Faye::WebSocket.load_adapter server
       reaction = Reaction::Adapters::RackAdapter.new opts
-      mount reaction, at: path
 
       # create client
       # uses (shares) in process client, so signer is already added.
-      Reaction.client = Reaction::Client.new reaction.get_client, opts[:key]
+      Reaction.client = Reaction::Client.new reaction.get_client, key
+
+      mount reaction, at: path
 
     end
 

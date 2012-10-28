@@ -94,4 +94,65 @@ describe 'Serializer' do
 
   end
 
+  context 'given an array of models and a sync request' do
+
+    Car = Struct.new :id, :name, :updated_at
+
+    before(:each) do
+      @cars = [ Car.new(256, 'X', Time.now),
+                Car.new(111, 'Y', Time.now)]
+    end
+
+    it 'should format the diff containing new cars' do
+
+      json = Reaction::Rails::Serializer.format_diff @cars, {}
+      deltas = JSON.parse(json)['deltas']
+
+      deltas.size.should be(2)
+      deltas.each do |d|
+        d.should include('action')
+        d['action'].should eq('create')
+        d.should include('item')
+        @cars.delete_if { |c| c.id == d['item']['id'] }
+      end
+      @cars.size.should be(0)
+
+    end
+
+    it 'should format the diff containing deleted persons' do
+
+      cached = { '5' => 1.day.ago.to_i }
+
+      json = Reaction::Rails::Serializer.format_diff @cars, cached: cached
+      deltas = JSON.parse(json)['deltas']
+
+      deltas.size.should be(3)
+      deltas.any? do |d|
+        d.include? 'action' and
+        d['action'] == 'destroy' and
+        d.include? 'item' and
+        d['item']['id'].to_i == 5
+      end.should be(true)
+
+    end
+
+    it 'should format the diff containing updated persons' do
+
+      cached = { '111' => 1.day.ago.to_i }
+
+      json = Reaction::Rails::Serializer.format_diff @cars, cached: cached
+      deltas = JSON.parse(json)['deltas']
+
+      deltas.size.should be(2)
+      deltas.any? do |d|
+        d.include? 'action' and
+        d['action'] == 'update' and
+        d.include? 'item' and
+        d['item']['id'].to_i == 111
+      end.should be(true)
+
+    end
+
+  end
+
 end
