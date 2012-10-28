@@ -17,7 +17,7 @@ define(['./util'], function(){
   return {
     paths: {         // TODO: should be provided by rails
       root: '/',
-      bayeux: '/reaction/bayeux'
+      reaction: '/reaction'
     },
     id: _.uuid()             // unique uuid for this client
   };

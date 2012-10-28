@@ -9,48 +9,88 @@ module ActionDispatch::Routing
   # Monkey-patched ActionDispatch mapper.
   class Mapper
 
+    # Uses an external reaction server.
+    #
+    # @example Using an external reaction server at +localhost:9292/reaction+.
+    #   use_reaction :at => 'http://localhost:9292/reaction'
+    #
+    # @option opts [String] :at     URL of external reaction server.
+    # @option opts [String] :key    secret token, used for signing messages
+    #                               published from app server; defaults to
+    #                               +Rails.application.config.secret_token+
+    # @raise [RuntimeError] if the reaction client has already been initialized.
+    # @return [Reaction::Client] client
+    def use_reaction(opts = {})
+
+      raise RuntimeError, 'Already using Reaction.' if Reaction.client
+
+      opts = use_reaction_defaults opts
+
+      EM.next_tick {
+        faye = Faye::Client.new(opts[:at] + '/bayeux')
+        signer = Reaction::Client::Signer.new opts[:key]
+        faye.add_extension signer
+        Reaction.client = Reaction::Client.new faye, opts[:key]
+      }
+
+    end
+
     # Mounts reaction server.
+    # Other Faye options (e.g. +timeout+) except +:mount+ may also be passed.
+    #
     # @example Mapping +'/reaction'+ to the reaction server.
     #   mount_reaction :at => '/reaction', :server => 'thin'
-    # @option opts [String] :at     where to mount reaction server; defaults to +'/reaction'
+    #
+    # @option opts [String] :at     where to mount reaction server; defaults to
+    #                               +'/reaction'
     # @option opts [String] :server which server to use; defaults to +'thin'+
-    # Other Faye options (e.g. +timeout+) except +:mount+ may also be passed.
+    # @option opts [String] :key    secret token, used for signing messages
+    #                               published from app server; defaults to
+    #                               +Rails.application.config.secret_token+
+    #
     # @raise [RuntimeError] if the server has already been mounted.
-    # @return [void]
+    # @return [Reaction::Client] client
     def mount_reaction(opts = {})
 
-      raise RuntimeError, 'Reaction already mounted.' if Reaction.bayeux
+      raise RuntimeError, 'Reaction already mounted.' if Reaction.client
 
-      opts = defaultize opts
-      path = opts.delete :at
-      server = opts.delete :server
+      opts = mount_reaction_defaults opts
+      path, server = opts.extract!(:at, :server).values
 
+      # create server
       Faye::WebSocket.load_adapter server
-      Reaction.registry = Reaction::Registry.new
-      Reaction.bayeux = Reaction::Adapters::RackAdapter.new(opts)
+      reaction = Reaction::Adapters::RackAdapter.new opts
+      mount reaction, at: path
 
-      monitor = Reaction::Registry::Monitor.new \
-        Reaction.bayeux,
-        Rails.application.config.secret_token
-      Reaction.bayeux.add_extension monitor
-
-      mount Reaction.bayeux, at: path
+      # create client
+      # uses (shares) in process client, so signer is already added.
+      Reaction.client = Reaction::Client.new reaction.get_client, opts[:key]
 
     end
 
     private
 
-    # Populates opts for reaction server with defaults.
+    # Populates +opts+ for reaction server with defaults.
     # @param [Hash] opts          hash of options
     # @return [Hash] defaultized options
-    def defaultize(opts)
+    def use_reaction_defaults(opts)
       defaults = {
-        at: '/reaction',
-        server: 'thin'
+        at: 'http://localhost:9292/reaction',
+        key: Rails.application.config.secret_token
       }
       opts = defaults.merge opts
-      opts.delete :mount
-      opts
+    end
+
+    # Populates +opts+ for reaction server with defaults.
+    # @param [Hash] opts          hash of options
+    # @return [Hash] defaultized options
+    def mount_reaction_defaults(opts)
+      defaults = {
+        at: '/reaction',
+        server: 'thin',
+        key: Rails.application.config.secret_token
+      }
+      opts = defaults.merge opts
     end
 
   end

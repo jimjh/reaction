@@ -4,7 +4,7 @@ require 'reaction/rails/require'
 
 shared_context 'rails app' do
 
-  after(:each) { Reaction.bayeux = nil }
+  after(:each) { Reaction.client = nil }
 
   def app
     DummyRails::Application

@@ -14,6 +14,8 @@ describe 'Rails app' do
       DummyRails::Application.routes.draw do
         match "/#{k}/index" => "#{k}#index"
       end
+      Reaction.client = double('client')
+      Reaction.client.should_receive(:access_token).with(anything())
     end
 
     it 'should return data in REACTION mime type if .reaction extension is present' do
@@ -74,6 +76,7 @@ describe 'Rails app' do
       DummyRails::Application.routes.draw do
         match "/#{k}/index" => "#{k}#index"
       end
+      Reaction.client = Reaction::Client.new nil, ::Rails.application.config.secret_token
     end
 
     it 'should generate an appropriate channel ID' do
@@ -166,6 +169,54 @@ describe 'Rails app' do
     let(:controller) { 'default' }
     let(:expected_channel) { /.*/ }
     it_should_behave_like 'a published, authenticated app'
+  end
+
+  context 'broadcasting actions' do
+
+    let(:delta) { Struct.new(:attributes) }
+
+    before(:each) do
+      @ctrl = DefaultController.new
+      @ctrl.params = {origin: 'x'}
+    end
+
+    it 'should broadcast a single action' do
+
+      data = [1, 2, 3]
+
+      Reaction.client = double('client')
+      Reaction.client.should_receive(:broadcast).once.with 'default',
+        '{"type":"data","items":%s,"action":"create","origin":"x"}' % data.to_json,
+        to: nil, except: nil
+      @ctrl.broadcast create: delta.new(data)
+
+    end
+
+    it 'should broadcast all actions' do
+
+      Reaction.client = double('client')
+
+      data1 = [1, 2, 3]
+      Reaction.client.should_receive(:broadcast).once.with 'default',
+        '{"type":"data","items":%s,"action":"create","origin":"x"}' % data1.to_json,
+        to: nil, except: nil
+
+      data2 = ['x', 'y', 'z']
+      Reaction.client.should_receive(:broadcast).once.with 'default',
+        '{"type":"data","items":%s,"action":"destroy","origin":"x"}' % data2.to_json,
+        to: nil, except: nil
+
+      data3 = {a: 'whatever'}
+      Reaction.client.should_receive(:broadcast).once.with 'default',
+        '{"type":"datum","item":%s,"action":"update","origin":"x"}' % data3.to_json,
+        to: nil,  except: nil
+
+      @ctrl.broadcast create: delta.new(data1),
+                      destroy: delta.new(data2),
+                      update: delta.new(data3)
+
+    end
+
   end
 
 end
