@@ -4,6 +4,7 @@ module Reaction
   class Client
     include Mixins::Logging
 
+    # Channel for broadcasting messages
     BROADCAST = '/__broadcast_'
 
     # Creates a new reaction client.
