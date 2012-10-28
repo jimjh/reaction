@@ -10,11 +10,11 @@ Gem::Specification.new do |gem|
   gem.homepage      = "http://github.com/jimjh/reaction"
   gem.license       = 'MIT'
 
-  gem.files         = %w(README.md LICENSE) + Dir.glob("lib/**/*") + Dir.glob("app/**/*")
-  gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
+  gem.files         = %w(README.md LICENSE QUICKSTART.md .yardopts) + Dir.glob("lib/**/*") + Dir.glob("app/**/*")
+  gem.executables   = ['reaction']
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.name          = "reaction"
-  gem.require_paths = ["lib"]
+  gem.name          = 'reaction'
+  gem.require_paths = ['lib']
   gem.version       = Reaction::VERSION
 
   # Test Stuff
