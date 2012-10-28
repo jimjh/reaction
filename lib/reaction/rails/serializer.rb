@@ -45,22 +45,23 @@ module Reaction
         # Prepares JSON in reaction data format and compares new results
         # against cached results on client.
         # @param [Enumerable] arr         some array of objects to send
-        # @param [Hash]       params      HTTP GET parameters
+        # @param [Hash]       params      HTTP GET parameters containing cached
+        #                                 results on client
         # @return [String] formatted json
         def format_diff(arr, params)
-          cached = params[:cached] || {}
-          sync = {type: 'sync', deltas: []}
+
+          cached, deltas = params[:cached] || {}, []
+
           arr.each do |new|
             id = new[:id].to_s
-            sync[:deltas] << if cached.include? id
-              next if cached.delete(id).to_f >= new[:updated_at].to_f
-              update_d new
-            else
-              create_d new
-            end
+            deltas << create_d(new) and next unless cached.include? id
+            next if cached.delete(id).to_f >= new[:updated_at].to_f
+            deltas << update_d(new)
           end
-          cached.each { |missing| sync[:deltas] << destroy_d(id: missing[0]) }
-          sync.to_json
+
+          cached.each { |missing| deltas << destroy_d(id: missing[0]) }
+          { type: 'sync', deltas: deltas }.to_json
+
         end
 
         private
