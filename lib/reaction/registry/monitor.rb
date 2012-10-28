@@ -30,13 +30,12 @@ module Reaction
       # Intercepts subscribe requests and registers client id with channel ids.
       def incoming(msg, cb)
 
-        info msg
-
         case msg['channel']
         when '/meta/subscribe'
           channel = ::Pathname.new(msg['subscription']).basename.to_s
           return deny(msg, cb) unless is_authorized? msg, channel
           @reaction.registry.add(channel, msg['clientId'])
+          info { "Subscribe request from #{msg['clientId']} approved."}
         when %r{^/meta/}
         else return app_push msg, cb
         end
@@ -62,13 +61,16 @@ module Reaction
       def broadcast(msg, cb)
 
         # de-encapsulate
-        encap = Marshal.load msg['data']
+        encap = Base64.urlsafe_decode64 msg['data']
+        encap = Marshal.load encap
         name, msg, to, except = encap[:n], encap[:m], encap[:t], encap[:e]
 
-        reaction.registry.each { |channel_id|
+        info { 'Broadcasting message for %s.' % name }
+
+        @reaction.registry.each { |channel_id|
           next unless accept(to, channel_id) and not accept(except, channel_id)
           channel = "/#{name}/#{channel_id}"
-          info { "pushing to #{channel_id}" }
+          info { "Pushing to channel #{channel_id}." }
           @reaction.get_client.publish(channel, msg)
         }
 

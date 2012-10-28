@@ -8,12 +8,11 @@ module Reaction
 
     # Creates a new reaction client.
     # @param [Faye::Client] client    bayeux client
-    # @param [String]       key       secret token
-    # FIXME: this code is messy - why do we have the secret token at so many
-    # different places?
-    def initialize(client, key)
+    # @param [String]       salt      secret salt, used to generate access
+    #                                 tokens
+    def initialize(client, salt)
       @faye = client
-      @key = key
+      @salt = salt
     end
 
     # Publishes message to zero or more channels.
@@ -33,13 +32,16 @@ module Reaction
               }
 
       EM.next_tick {
-        @faye.publish BROADCAST, Marshal.dump(encap)
+        @faye.publish BROADCAST, Base64.urlsafe_encode64(Marshal.dump(encap))
       }
 
     end
 
+    # Generates access tokens that can be passed to the browser client.
+    # @param [Hash] opts      hash of data to be included in the token
+    # @return [String] access token
     def access_token(opts)
-      Registry::Auth.generate_token({salt: @key}.merge opts)
+      Registry::Auth.generate_token({salt: @salt}.merge opts)
     end
 
   end

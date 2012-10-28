@@ -14,6 +14,8 @@ describe 'Rails app' do
       DummyRails::Application.routes.draw do
         match "/#{k}/index" => "#{k}#index"
       end
+      Reaction.client = double('client')
+      Reaction.client.should_receive(:access_token).with(anything())
     end
 
     it 'should return data in REACTION mime type if .reaction extension is present' do
@@ -74,6 +76,7 @@ describe 'Rails app' do
       DummyRails::Application.routes.draw do
         match "/#{k}/index" => "#{k}#index"
       end
+      Reaction.client = Reaction::Client.new nil, ::Rails.application.config.secret_token
     end
 
     it 'should generate an appropriate channel ID' do
