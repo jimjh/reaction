@@ -22,6 +22,7 @@ namespace :doc do
   end
 
   YARD::Rake::YardocTask.new do |t|
+    t.options = ['--output-dir', 'doc/rb']
   end
 
   desc 'Generate documentation for ruby scripts'

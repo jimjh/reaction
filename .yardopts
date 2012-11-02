@@ -1,4 +1,5 @@
---output-dir doc/rb -
+--title "Reaction"
+lib/**/*.rb -
 README.md
 QUICKSTART.md
 LICENSE
