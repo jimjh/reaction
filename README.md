@@ -10,7 +10,8 @@ and the server's database easy and almost transparent.  Refer to
 [reaction-todos][todos] for an example.
 
 This is still an alpha version. Reaction uses [YARD][yard] for ruby
-documentation and [Groc][groc] for Javascript documentation.
+documentation and [Groc][groc] for Javascript documentation. To get started,
+refer to the [quickstart][quickstart].
 
 ## Installation
 
@@ -54,3 +55,4 @@ To use the development copy of the gem, add the following line in your applicati
   [spec]: https://github.com/jimjh/reaction/tree/master/spec
   [test]: https://github.com/jimjh/reaction/tree/master/test
   [should]: https://github.com/visionmedia/should.js
+  [quickstart]: https://github.com/jimjh/reaction/blob/master/QUICKSTART.md
