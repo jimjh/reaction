@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
 
   # Test Stuff
   gem.add_development_dependency 'rspec', '~> 2.11'
-  gem.add_development_dependency 'rake', '~> 0.9'
+  gem.add_development_dependency 'rake', '~> 10.0.0'
   gem.add_development_dependency 'rack-test'
   gem.add_development_dependency 'debugger-pry'
 
