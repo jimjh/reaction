@@ -47,7 +47,7 @@ To use the development copy of the gem, add the following line in your applicati
   [faye]: http://faye.jcoglan.com
   [yard]: http://yardoc.org/
   [groc]: http://nevir.github.com/groc/
-  [mocha]: http://visionmedia.github.com/mocha/
+  [mocha]: http://mochajs.org/
   [require]: http://requirejs.org/
   [pry]: http://pryrepl.org/
   [rspec]: http://rspec.info/
